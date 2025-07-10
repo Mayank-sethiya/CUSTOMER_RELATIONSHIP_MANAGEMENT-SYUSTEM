@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - TrackForce CRM</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ... keep existing code (all CSS styles from user-controlpanel.html) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #f1f5f9;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    body[data-theme="light"] {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      color: #1e293b;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: rgba(71, 85, 105, 0.5);
+      --shadow: rgba(0, 0, 0, 0.3);
+      --sidebar-bg: #1e293b;
+      --card-bg: #1e293b;
+      --sidebar-text: #f1f5f9;
+      --sidebar-text-secondary: #94a3b8;
+    }
+
+    body[data-theme="light"] {
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: rgba(226, 232, 240, 0.5);
+      --shadow: rgba(0, 0, 0, 0.1);
+      --sidebar-bg: #ffffff;
+      --card-bg: #ffffff;
+      --sidebar-text: #1e293b;
+      --sidebar-text-secondary: #64748b;
+    }
+
+    .header {
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(10px);
+      padding: 20px 30px;
+      box-shadow: 0 2px 20px var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-button {
+      background: rgba(79, 70, 229, 0.2);
+      color: var(--primary);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .back-button:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .user-welcome {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--sidebar-text);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(79, 70, 229, 0.2);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(10px);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 80px;
+      box-shadow: 2px 0 20px var(--shadow);
+      z-index: 900;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 30px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--sidebar-text);
+      margin-bottom: 5px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 14px;
+      color: var(--sidebar-text-secondary);
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+
+    .nav-section {
+      margin-bottom: 25px;
+    }
+
+    .nav-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sidebar-text-secondary);
+      padding: 0 30px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 30px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      width: 24px;
+    }
+
+    .nav-item span {
+      font-weight: 500;
+    }
+
+    .main-container {
+      margin-left: 280px;
+      padding: 80px 40px 40px;
+      transition: margin-left 0.3s ease;
+      overflow-y: auto;
+      max-height: calc(100vh - 80px);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 30px var(--shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 15px 0;
+    }
+
+    .stat-card:nth-child(1) .stat-number {
+      color: #ff6b6b;
+    }
+
+    .stat-card:nth-child(2) .stat-number {
+      color: #4ecdc4;
+    }
+
+    .stat-card:nth-child(3) .stat-number {
+      color: #45b7d1;
+    }
+
+    .stat-card:nth-child(4) .stat-number {
+      color: #f093fb;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: rgba(79, 70, 229, 0.1);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--primary);
+      cursor: pointer;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .task-due {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding-top: 20px;
+        box-shadow: none;
+        margin-bottom: 20px;
+      }
+
+      .main-container {
+        margin-left: 0;
+        padding: 20px;
+        max-height: none;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+<div class="header">
+  <div class="header-left">
+    <button class="back-button">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <span class="user-welcome" id="userWelcome">Welcome, User!</span>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle">
+      <i class="fas fa-adjust"></i>
+    </button>
+    <button class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">TrackForce CRM</h2>
+    <h4 class="sidebar-subtitle">User Dashboard</h4>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <h6 class="nav-section-title">Main</h6>
+      <a href="dashboard.html" class="nav-item active">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <h6 class="nav-section-title">Tasks</h6>
+      <a href="view-tasks.html" class="nav-item">
+        <i class="fas fa-tasks"></i>
+        <span>View Tasks</span>
+      </a>
+      <a href="create-task.html" class="nav-item">
+        <i class="fas fa-plus-circle"></i>
+        <span>Create Task</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <h6 class="nav-section-title">Settings</h6>
+      <a href="settings.html" class="nav-item">
+        <i class="fas fa-cog"></i>
+        <span>Account Settings</span>
+      </a>
+      <a href="notification.html" class="nav-item">
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<div class="main-container">
+  <div class="dashboard-grid">
+    <div class="dashboard-card stat-card">
+      <h3 class="card-title">My Tasks</h3>
+      <p class="card-subtitle">Open tasks assigned to you</p>
+      <div class="stat-number" id="myTasks">Loading...</div>
+    </div>
+
+    <div class="dashboard-card stat-card">
+      <h3 class="card-title">Completed Today</h3>
+      <p class="card-subtitle">Tasks completed today</p>
+      <div class="stat-number" id="completedToday">Loading...</div>
+    </div>
+
+    <div class="dashboard-card stat-card">
+      <h3 class="card-title">Messages</h3>
+      <p class="card-subtitle">Unread messages</p>
+      <div class="stat-number" id="unreadMessages">Loading...</div>
+    </div>
+
+    <div class="dashboard-card stat-card">
+      <h3 class="card-title">Upcoming</h3>
+      <p class="card-subtitle">Due this week</p>
+      <div class="stat-number" id="upcomingTasks">Loading...</div>
+    </div>
+
+    <div class="dashboard-card" style="grid-column: 1 / -1;">
+      <h3 class="card-title">Recent Tasks</h3>
+      <p class="card-subtitle">Your latest task activities</p>
+      <div id="recentTasks">
+        <!-- Tasks will be loaded here via API -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Get user name from localStorage and update welcome message
+    const userName = localStorage.getItem('userName');
+    const userWelcome = document.getElementById('userWelcome');
+    if (userName) {
+      userWelcome.textContent = `Hi ${userName}!`;
+    }
+
+    document.querySelector('.theme-toggle').addEventListener('click', function() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+    });
+
+    // Back button functionality
+    const backButton = document.querySelector('.back-button');
+    backButton.addEventListener('click', function() {
+      window.location.href = '../index.html';
+    });
+
+    // Logout button functionality
+    const logoutButton = document.querySelector('.logout-btn');
+    logoutButton.addEventListener('click', function() {
+      localStorage.removeItem('userName');
+      window.location.href = '../index.html';
+    });
+
+    // Load dashboard data
+    loadDashboardData();
+  });
+
+  async function loadDashboardData() {
+    try {
+      // API endpoint for user dashboard statistics
+      const response = await fetch('/api/user/dashboard-stats');
+      const data = await response.json();
+
+      // Update dashboard cards with real data
+      document.getElementById('myTasks').textContent = data.myTasks || '24';
+      document.getElementById('completedToday').textContent = data.completedToday || '8';
+      document.getElementById('unreadMessages').textContent = data.unreadMessages || '12';
+      document.getElementById('upcomingTasks').textContent = data.upcomingTasks || '4';
+
+      // Load recent tasks
+      displayRecentTasks(data.recentTasks || []);
+    } catch (error) {
+      console.log('Using demo data - API not connected');
+      // Demo data when API is not available
+      document.getElementById('myTasks').textContent = '24';
+      document.getElementById('completedToday').textContent = '8';
+      document.getElementById('unreadMessages').textContent = '12';
+      document.getElementById('upcomingTasks').textContent = '4';
+
+      // Demo recent tasks
+      const demoTasks = [
+        { id: 1, title: 'Review client proposal', due: '2024-01-16', completed: false },
+        { id: 2, title: 'Update project documentation', due: '2024-01-17', completed: false },
+        { id: 3, title: 'Prepare presentation slides', due: '2024-01-18', completed: true }
+      ];
+      displayRecentTasks(demoTasks);
+    }
+  }
+
+  function displayRecentTasks(tasks) {
+    const container = document.getElementById('recentTasks');
+    container.innerHTML = tasks.map(task => `
+            <div class="task-item">
+                <div class="task-checkbox ${task.completed ? 'completed' : ''}" onclick="toggleTask(${task.id})"></div>
+                <div class="task-content">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-due">Due: ${task.due}</div>
+                </div>
+            </div>
+        `).join('');
+  }
+
+  function toggleTask(taskId) {
+    // API endpoint for toggling task completion
+    // PUT /api/user/tasks/{taskId}/toggle
+    console.log('Toggle task:', taskId);
+  }
+</script>
+</body>
+</html>

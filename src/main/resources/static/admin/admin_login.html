@@ -1,0 +1,769 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - TrackForce CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Light theme variables */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --container-bg: rgba(255, 255, 255, 0.98);
+            --text-primary: #ffffff;
+            --text-secondary: #6b7280;
+            --text-accent: #667eea;
+            --input-bg: #ffffff;
+            --input-border: #e5e7eb;
+            --input-focus-border: #667eea;
+            --input-focus-shadow: rgba(102, 126, 234, 0.12);
+            --button-gradient-start: #667eea;
+            --button-gradient-end: #764ba2;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --border-radius: 20px;
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e293b;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --container-bg: rgba(15, 23, 42, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-accent: #60a5fa;
+            --input-bg: #1e293b;
+            --input-border: #334155;
+            --input-focus-border: #60a5fa;
+            --input-focus-shadow: rgba(96, 165, 250, 0.12);
+            --button-gradient-start: #3b82f6;
+            --button-gradient-end: #8b5cf6;
+            --success-color: #34d399;
+            --error-color: #f87171;
+            --warning-color: #fbbf24;
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Enhanced Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
+            font-size: 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Enhanced Back Arrow */
+        .back-arrow {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: white;
+            font-size: 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-arrow:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Enhanced Animated Background */
+        .tech-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        .grid-lines {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background-image:
+                    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: moveGrid 25s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 120px; height: 120px;
+            top: 15%; left: 10%;
+            animation-delay: 0s;
+        }
+        .floating-circle:nth-child(2) {
+            width: 80px; height: 80px;
+            top: 60%; right: 15%;
+            animation-delay: 2s;
+        }
+        .floating-circle:nth-child(3) {
+            width: 100px; height: 100px;
+            bottom: 25%; left: 65%;
+            animation-delay: 4s;
+        }
+        .floating-circle:nth-child(4) {
+            width: 60px; height: 60px;
+            top: 35%; left: 85%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 0.6;
+            }
+        }
+
+        /* Enhanced Main Container */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            background: var(--container-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: var(--border-radius);
+            padding: 50px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: var(--card-shadow);
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Enhanced Header */
+        .header {
+            text-align: center;
+            margin-bottom: 45px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .header p i {
+            color: var(--text-accent);
+            font-size: 18px;
+        }
+
+        /* Enhanced Form Styling */
+        .form-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .form-group label {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: var(--text-accent);
+            width: 16px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 18px 20px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 400;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .form-group input:focus {
+            border-color: var(--input-focus-border);
+            background: var(--input-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px var(--input-focus-shadow);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 18px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus + .input-icon {
+            color: var(--input-focus-border);
+        }
+
+        /* Enhanced Button */
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-btn .loading {
+            display: none;
+        }
+
+        .login-btn.loading .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Messages */
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .message.success::before {
+            background: var(--success-color);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+
+        .message.error::before {
+            background: var(--error-color);
+        }
+
+        /* Enhanced Divider */
+        .divider {
+            text-align: center;
+            margin: 35px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--input-border);
+        }
+
+        .divider span {
+            background: var(--container-bg);
+            padding: 0 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Enhanced Navigation Links */
+        .nav-links {
+            text-align: center;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-btn i {
+            font-size: 12px;
+        }
+
+        /* Enhanced Security Badge */
+        .security-badge {
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid var(--text-accent);
+        }
+
+        .security-badge i {
+            color: var(--success-color);
+            font-size: 18px;
+        }
+
+        .security-badge span {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            body {
+                padding: 15px;
+            }
+
+            .login-container {
+                padding: 35px 25px;
+                max-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .back-arrow, .theme-toggle {
+                top: 20px;
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+
+            .theme-toggle {
+                right: 20px;
+            }
+
+            .back-arrow {
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<a href="../index.html" class="back-arrow">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<button class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="tech-bg">
+    <div class="grid-lines"></div>
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+</div>
+
+<div class="login-container">
+    <div class="header">
+        <h1>TrackForce CRM</h1>
+        <p>
+            <i class="fas fa-user-shield"></i>
+            Administrator Portal
+        </p>
+    </div>
+
+    <form id="adminLoginForm">
+        <div class="message" id="errorMsg"></div>
+        <div class="message" id="successMsg"></div>
+
+        <div class="form-group">
+            <label for="username">
+                <i class="fas fa-user-tie"></i>
+                Administrator Username
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="username" placeholder="Enter your admin username" required>
+                <i class="fas fa-user-tie input-icon"></i>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">
+                <i class="fas fa-lock"></i>
+                Password
+            </label>
+            <div class="input-wrapper">
+                <input type="password" id="password" placeholder="Enter your password" required>
+                <i class="fas fa-lock input-icon"></i>
+            </div>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginButton">
+            <i class="fas fa-spinner loading"></i>
+            <i class="fas fa-sign-in-alt"></i>
+            Access Admin Panel
+        </button>
+    </form>
+
+    <div class="security-badge">
+        <i class="fas fa-shield-alt"></i>
+        <span>Secure administrative access with end-to-end encryption</span>
+    </div>
+
+    <div class="divider">
+        <span>Other Options</span>
+    </div>
+
+    <div class="nav-links">
+        <a href="../user/user-login.html" class="nav-btn">
+            <i class="fas fa-user"></i>
+            User Login
+        </a>
+        <a href="../user/register.html" class="nav-btn">
+            <i class="fas fa-user-plus"></i>
+            New Registration
+        </a>
+    </div>
+</div>
+
+<script>
+    // Theme functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Load saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    body.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        const icon = themeToggle.querySelector('i');
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    // Form functionality
+    const form = document.getElementById('adminLoginForm');
+    const errorDiv = document.getElementById('errorMsg');
+    const successDiv = document.getElementById('successMsg');
+    const loginButton = document.getElementById('loginButton');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Hide previous messages
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        // Show loading state
+        loginButton.classList.add('loading');
+        loginButton.disabled = true;
+        loginButton.innerHTML = '<i class="fas fa-spinner loading"></i> Signing In...';
+
+        try {
+            const response = await fetch('http://localhost:8080/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const message = await response.text();
+                if (message === "success") {
+                    // Store admin username in localStorage
+                    localStorage.setItem('adminName', username);
+
+                    showSuccess('🎉 Login successful! Redirecting to admin panel...');
+
+                    // Success animation
+                    loginButton.innerHTML = '<i class="fas fa-check"></i> Access Granted!';
+                    loginButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+                    setTimeout(() => {
+                        window.location.href = "admin_controlpanel.html";
+                    }, 2000);
+                } else {
+                    showError("Unexpected response from server.");
+                    resetButton();
+                }
+            } else {
+                const errorMsg = await response.text();
+                showError(errorMsg || "Login failed. Please check your credentials.");
+                resetButton();
+            }
+        } catch (err) {
+            showError("Unable to connect to server. Please check your connection and try again.");
+            resetButton();
+        }
+    });
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.className = 'message error';
+        errorDiv.style.display = 'block';
+    }
+
+    function showSuccess(message) {
+        successDiv.textContent = message;
+        successDiv.className = 'message success';
+        successDiv.style.display = 'block';
+    }
+
+    function resetButton() {
+        loginButton.classList.remove('loading');
+        loginButton.disabled = false;
+        loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access Admin Panel';
+    }
+
+    // Add input validation feedback
+    const inputs = document.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.style.borderColor = 'var(--error-color)';
+            } else {
+                this.style.borderColor = 'var(--success-color)';
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.style.borderColor === 'var(--error-color)' && this.value.trim() !== '') {
+                this.style.borderColor = 'var(--input-border)';
+            }
+        });
+    });
+</script>
+</body>
+</html>

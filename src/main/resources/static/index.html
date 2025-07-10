@@ -1,0 +1,897 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrackForce CRM - Professional Customer Relationship Management</title>
+  <meta name="description" content="TrackForce CRM - Advanced customer relationship management with AI-powered insights, automation, and enterprise-grade security." />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4ba2ff;
+      --primary-dark: #3730a3;
+      --secondary: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --background: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.95);
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: rgba(226, 232, 240, 0.5);
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Dark Theme Variables */
+    [data-theme="dark"] {
+      --background: #0f172a;
+      --surface: rgba(30, 41, 59, 0.95);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: rgba(71, 85, 105, 0.5);
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    /* Navigation */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      backdrop-filter: blur(10px);
+      padding: 15px 30px;
+      box-shadow: 0 2px 20px var(--shadow);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 24px;
+    }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-admin {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-admin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-outline {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .theme-toggle {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Mobile menu */
+    .mobile-menu-btn {
+      display: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      background: var(--surface);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      box-shadow: 0 4px 20px var(--shadow);
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .mobile-menu.active {
+      display: flex;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 120px 40px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-video {
+      width: 100%;
+      max-width: 900px;
+      height: 400px;
+      margin: 40px auto;
+      background: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop') center/cover;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    #videoContainer iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+      border: none;
+      transform: scale(1.3); /* adjust zoom level */
+      transform-origin: center;
+    }
+
+
+    .play-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--primary);
+      font-size: 30px;
+    }
+
+    .play-button:hover {
+      background: white;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .btn-lg {
+      padding: 18px 35px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .btn-cta {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    /* Stats Section */
+    .stats {
+      padding: 80px 40px;
+      background: var(--background);
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px var(--shadow);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px var(--shadow);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:nth-child(1)::before {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+    }
+
+    .stat-card:nth-child(2)::before {
+      background: linear-gradient(135deg, var(--secondary), #059669);
+    }
+
+    .stat-card:nth-child(3)::before {
+      background: linear-gradient(135deg, var(--warning), #d97706);
+    }
+
+    .stat-card:nth-child(4)::before {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 100px 40px;
+      background: var(--surface);
+    }
+
+    .features-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-header h2 {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .section-header p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 40px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px var(--shadow);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px var(--shadow);
+    }
+
+    .feature-image {
+      width: 100%;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .feature-card h3 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* Footer */
+    .footer {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 80px 40px 40px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-section h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .footer-section p,
+    .footer-section a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      line-height: 1.6;
+      transition: color 0.2s ease;
+    }
+
+    .footer-section a:hover {
+      color: white;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 30px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+      display: none;
+    }
+
+    .toast.success { background: var(--secondary); }
+    .toast.error { background: var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-buttons {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .hero {
+        padding: 100px 20px 60px;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <a href="#" class="logo">
+    <div class="logo-icon">
+      <i class="fas fa-chart-line"></i>
+    </div>
+    TrackForce CRM
+  </a>
+
+  <div class="nav-buttons">
+    <button onclick="window.location.href='user/user-login.html'" class="btn btn-primary">
+      <i class="fas fa-user"></i>
+      User Login
+    </button>
+    <button onclick="window.location.href='admin/admin_login.html'" class="btn btn-admin">
+      <i class="fas fa-shield-alt"></i>
+      Admin Login
+    </button>
+    <button onclick="window.location.href='user/register.html'" class="btn btn-outline">
+      <i class="fas fa-user-plus"></i>
+      Sign Up
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <button onclick="window.location.href='user/user-login.html'" class="btn btn-primary">
+      <i class="fas fa-user"></i>
+      User Login
+    </button>
+    <button onclick="window.location.href='admin/admin_login.html'" class="btn btn-admin">
+      <i class="fas fa-shield-alt"></i>
+      Admin Login
+    </button>
+    <button onclick="window.location.href='user/register.html'" class="btn btn-outline">
+      <i class="fas fa-user-plus"></i>
+      Sign Up
+    </button>
+  </div>
+</nav>
+
+<!-- Toast Notifications -->
+<div id="successMessage" class="toast success">
+  <strong>Success!</strong> <span id="successText"></span>
+</div>
+<div id="errorMessage" class="toast error">
+  <strong>Error!</strong> <span id="errorText"></span>
+</div>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>🚀 Transform Your Business with TrackForce CRM</h1>
+    <p>Professional customer relationship management with advanced analytics, intelligent automation, and enterprise-grade security to scale your business operations.</p>
+
+    <div class="hero-video" id="videoHero">
+      <div class="play-button" onclick="playVideo()">
+        <i class="fas fa-play"></i>
+      </div>
+
+      <div id="videoContainer" style="display: none; width: 100%; height: 100%;">
+        <iframe src="https://drive.google.com/file/d/14ouWpLkq0rXE5E_VKDKrMsk8aywDM6-c/preview"
+                width="100%" height="100%" allow="autoplay" style="border: none; border-radius: 20px;"></iframe>
+      </div>
+    </div>
+
+    <script>
+      function playVideo() {
+        document.querySelector('.play-button').style.display = 'none';
+        document.getElementById('videoHero').style.background = 'none';
+        document.getElementById('videoContainer').style.display = 'block';
+      }
+    </script>
+
+  </div>
+
+    <div class="cta-buttons">
+      <button class="btn btn-cta btn-lg" onclick="scrollToFeatures()">
+        <i class="fas fa-rocket"></i>
+        Explore Features
+      </button>
+      <button onclick="window.location.href='user/register.html'" class="btn btn-secondary btn-lg">
+        <i class="fas fa-arrow-right"></i>
+        Start Free Trial
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+  <div class="stats-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">50K+</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">99.99%</div>
+        <div class="stat-label">System Uptime</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">2,500+</div>
+        <div class="stat-label">Companies Trust Us</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Expert Support</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+  <div class="features-container">
+    <div class="section-header">
+      <h2>🎯 Enterprise CRM Solutions</h2>
+      <p>Comprehensive tools designed to streamline your sales process, enhance customer relationships, and drive business growth with cutting-edge technology.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-users feature-icon"></i>
+        <h3>Advanced Contact Management</h3>
+        <p>Centralize customer data with comprehensive profiles, interaction history, automated segmentation, and intelligent lead scoring for personalized engagement strategies.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-chart-bar feature-icon"></i>
+        <h3>AI-Powered Analytics</h3>
+        <p>Leverage machine learning insights, predictive analytics, sales forecasting, and real-time dashboards to make data-driven business decisions.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-cogs feature-icon"></i>
+        <h3>Intelligent Automation</h3>
+        <p>Automate workflows, email sequences, follow-ups, and task assignments while maintaining personalized customer experiences at scale.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-broadcast-tower feature-icon"></i>
+        <h3>Omnichannel Communication</h3>
+        <p>Integrate email, SMS, social media, live chat, and voice calls in one unified platform for seamless customer engagement across all touchpoints.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-mobile-alt feature-icon"></i>
+        <h3>Mobile-First Design</h3>
+        <p>Access your CRM anywhere with responsive design, offline sync capabilities, and optimized workflows for field teams and remote workers.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-image" style="background-image: url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop')"></div>
+        <i class="fas fa-shield-alt feature-icon"></i>
+        <h3>Enterprise Security</h3>
+        <p>Bank-level encryption, GDPR compliance, role-based access control, comprehensive audit logs, and enterprise-grade data protection.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>TrackForce CRM</h3>
+      <p>Empowering businesses worldwide with intelligent customer relationship management solutions that drive growth and success.</p>
+    </div>
+
+    <div class="footer-section">
+      <h3>Core Features</h3>
+      <ul class="footer-links">
+        <li><a href="#features">Contact Management</a></li>
+        <li><a href="#features">Analytics Dashboard</a></li>
+        <li><a href="#features">Automation Tools</a></li>
+        <li><a href="#features">Mobile Access</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Solutions</h3>
+      <ul class="footer-links">
+        <li><a href="#sales">Sales Teams</a></li>
+        <li><a href="#marketing">Marketing Automation</a></li>
+        <li><a href="#support">Customer Support</a></li>
+        <li><a href="#enterprise">Enterprise Solutions</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Support & Resources</h3>
+      <ul class="footer-links">
+        <li><a href="#help">Help Center</a></li>
+        <li><a href="#training">Training Resources</a></li>
+        <li><a href="#api">API Documentation</a></li>
+        <li><a href="#status">System Status</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 TrackForce CRM | Professional Customer Relationship Management Platform. All rights reserved.
+  </div>
+</footer>
+
+<script>
+  // Theme Toggle Function
+  function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (body.getAttribute('data-theme') === 'dark') {
+      body.removeAttribute('data-theme');
+      themeIcon.className = 'fas fa-moon';
+      localStorage.setItem('theme', 'light');
+      showToast('Light theme activated', 'success');
+    } else {
+      body.setAttribute('data-theme', 'dark');
+      themeIcon.className = 'fas fa-sun';
+      localStorage.setItem('theme', 'dark');
+      showToast('Dark theme activated', 'success');
+    }
+  }
+
+  // Mobile Menu Toggle
+  function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.classList.toggle('active');
+  }
+
+  // Scroll to Features
+  function scrollToFeatures() {
+    document.getElementById('features').scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+  // Toast Notification Function
+  function showToast(message, type) {
+    const toast = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+    const textElement = document.getElementById(type === 'success' ? 'successText' : 'errorText');
+
+    textElement.textContent = message;
+    toast.style.display = 'block';
+
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  // Load saved theme on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const body = document.body;
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (savedTheme === 'dark') {
+      body.setAttribute('data-theme', 'dark');
+      themeIcon.className = 'fas fa-sun';
+    }
+
+    console.log('TrackForce CRM Homepage loaded successfully');
+  });
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuButton = e.target.closest('.mobile-menu-btn');
+
+    if (!menuButton && !mobileMenu.contains(e.target)) {
+      mobileMenu.classList.remove('active');
+    }
+  });
+
+
+
+</script>
+</body>
+</html>

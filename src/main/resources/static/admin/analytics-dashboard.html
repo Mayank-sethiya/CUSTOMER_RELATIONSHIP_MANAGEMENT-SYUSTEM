@@ -1,0 +1,697 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - TrackForce CRM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #f1f5f9;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body[data-theme="light"] {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #1e293b;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(71, 85, 105, 0.5);
+            --shadow: rgba(0, 0, 0, 0.3);
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --sidebar-text: #f1f5f9;
+            --sidebar-text-secondary: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(226, 232, 240, 0.5);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --sidebar-text: #1e293b;
+            --sidebar-text-secondary: #64748b;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            box-shadow: 0 2px 20px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .back-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .admin-welcome {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--sidebar-text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 100px 40px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:nth-child(1)::before { background: #e74c3c; }
+        .stat-card:nth-child(2)::before { background: #3498db; }
+        .stat-card:nth-child(3)::before { background: #2ecc71; }
+        .stat-card:nth-child(4)::before { background: #9b59b6; }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stat-card:nth-child(1) .stat-icon { background: #e74c3c; }
+        .stat-card:nth-child(2) .stat-icon { background: #3498db; }
+        .stat-card:nth-child(3) .stat-icon { background: #2ecc71; }
+        .stat-card:nth-child(4) .stat-icon { background: #9b59b6; }
+
+        .stat-trend {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .trend-down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-filter {
+            padding: 8px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Table Styles */
+        .recent-activity {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .activity-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .view-all-btn {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .view-all-btn:hover {
+            color: #4f46e5;
+        }
+
+        .activity-list {
+            space-y: 15px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-text {
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .activity-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 100px 20px 40px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+<div class="header">
+    <div class="header-left">
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="admin-welcome" id="adminWelcome">Welcome, Admin!</span>
+    </div>
+    <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-adjust"></i>
+        </button>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<div class="main-container">
+    <h1 class="page-title">
+        <i class="fas fa-chart-bar"></i>
+        Analytics Dashboard
+    </h1>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-trend trend-up">+12%</div>
+            </div>
+            <div class="stat-value" id="totalUsers">1,234</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-trend trend-up">+8%</div>
+            </div>
+            <div class="stat-value" id="pageViews">45,678</div>
+            <div class="stat-label">Page Views</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-trend trend-up">+15%</div>
+            </div>
+            <div class="stat-value" id="revenue">$12,340</div>
+            <div class="stat-label">Revenue</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-trend trend-down">-3%</div>
+            </div>
+            <div class="stat-value" id="conversion">3.2%</div>
+            <div class="stat-label">Conversion Rate</div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">User Activity</h3>
+                <select class="chart-filter" id="activityFilter">
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">User Distribution</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <div class="activity-header">
+            <h3 class="activity-title">Recent Activity</h3>
+            <a href="#" class="view-all-btn">View All</a>
+        </div>
+
+        <div class="activity-list" id="activityList">
+            <div class="activity-item">
+                <div class="activity-avatar">JD</div>
+                <div class="activity-details">
+                    <div class="activity-text">John Doe registered as a new user</div>
+                    <div class="activity-time">2 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-avatar">JS</div>
+                <div class="activity-details">
+                    <div class="activity-text">Jane Smith updated her profile</div>
+                    <div class="activity-time">15 minutes ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-avatar">MB</div>
+                <div class="activity-details">
+                    <div class="activity-text">Mike Brown made a purchase</div>
+                    <div class="activity-time">1 hour ago</div>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-avatar">SL</div>
+                <div class="activity-details">
+                    <div class="activity-text">Sarah Lee contacted support</div>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get admin name from localStorage
+        const adminName = localStorage.getItem('adminName');
+        const adminWelcome = document.getElementById('adminWelcome');
+        if (adminName) {
+            adminWelcome.textContent = `Hi ${adminName}!`;
+        }
+
+        // Initialize charts
+        initializeCharts();
+
+        // Load analytics data
+        loadAnalyticsData();
+    });
+
+    // Theme toggle
+    function toggleTheme() {
+        const body = document.body;
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.setAttribute('data-theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+        }
+    }
+
+    // Navigation
+    function goBack() {
+        window.location.href = 'admin_controlpanel.html';
+    }
+
+    function logout() {
+        localStorage.removeItem('adminName');
+        window.location.href = '../index.html';
+    }
+
+    // Initialize Charts
+    function initializeCharts() {
+        // Activity Chart
+        const activityCtx = document.getElementById('activityChart').getContext('2d');
+        const activityChart = new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Active Users',
+                    data: [120, 190, 300, 500, 200, 300, 450],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(71, 85, 105, 0.2)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(71, 85, 105, 0.2)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Distribution Chart (Doughnut)
+        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+        const distributionChart = new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Desktop', 'Mobile', 'Tablet'],
+                datasets: [{
+                    data: [65, 28, 7],
+                    backgroundColor: ['#6366f1', '#22c55e', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Load Analytics Data (ready for API integration)
+    function loadAnalyticsData() {
+        // TODO: Replace with actual API calls
+        // fetch('/api/analytics/stats')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         updateStats(data);
+        //     });
+
+        // fetch('/api/analytics/activity')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         updateActivity(data);
+        //     });
+
+        console.log('Loading analytics data from API...');
+    }
+
+    // Update stats (for API integration)
+    function updateStats(data) {
+        document.getElementById('totalUsers').textContent = data.totalUsers || '1,234';
+        document.getElementById('pageViews').textContent = data.pageViews || '45,678';
+        document.getElementById('revenue').textContent = data.revenue || '$12,340';
+        document.getElementById('conversion').textContent = data.conversion || '3.2%';
+    }
+
+    // Filter change handler
+    document.getElementById('activityFilter').addEventListener('change', function(e) {
+        const period = e.target.value;
+        // TODO: Update chart with new data based on period
+        // fetch(`/api/analytics/activity?period=${period}`)
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         updateActivityChart(data);
+        //     });
+        console.log('Filter changed to:', period);
+    });
+</script>
+
+</body>
+</html>
