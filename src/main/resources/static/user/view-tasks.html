@@ -951,12 +951,18 @@
                 method: 'PUT'
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error("Task status update failed: " + errorText);
+            }
 
-            const now = new Date().toISOString();
-            localStorage.setItem('activeTaskId', taskId);
-            localStorage.setItem('taskStartTime', now);
-            startDeadlineCountdown(); // 🟢 Start countdown immediately
+            // Optionally try to parse the body (but safely!)
+            let updatedTask;
+            try {
+                updatedTask = await response.json();
+            } catch (e) {
+                updatedTask = null; // maybe empty response body
+            }
 
             const task = allTasks.find(t => t.id === taskId);
             if (task) {
@@ -964,13 +970,14 @@
                 filterTasks(currentFilter);
             }
 
-            alert("Timer started for task " + taskId);
+            alert("✅ Task marked In Progress!");
 
         } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to mark task as In Progress');
+            console.error("Error:", error);
+            alert("❌ Failed to mark task as In Progress.\n" + error.message);
         }
     }
+
 
     async function markTaskComplete(taskId) {
         try {
@@ -978,7 +985,17 @@
                 method: 'PUT'
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error("Task complete failed: " + errorText);
+            }
+
+            let updatedTask;
+            try {
+                updatedTask = await response.json();
+            } catch (e) {
+                updatedTask = null;
+            }
 
             const task = allTasks.find(t => t.id === taskId);
             if (task) {
@@ -986,20 +1003,14 @@
                 filterTasks(currentFilter);
             }
 
-            if (taskId === parseInt(localStorage.getItem('activeTaskId'))) {
-                localStorage.removeItem('taskStartTime');
-                localStorage.removeItem('activeTaskId');
-                clearInterval(window.deadlineInterval);
-                document.getElementById('deadlineTimer').textContent = 'No task in progress';
-            }
-
-            console.log(`Task ${taskId} marked as complete successfully`);
+            alert("✅ Task marked as complete!");
 
         } catch (error) {
-            console.error('Error marking task complete:', error);
-            alert('Failed to mark task as complete. Please try again.');
+            console.error("Error marking task complete:", error);
+            alert("❌ Failed to mark task as complete.\n" + error.message);
         }
     }
+
 
     async function markTaskIncomplete(taskId) {
         try {
@@ -1028,29 +1039,29 @@
 
     async function viewTaskFiles(taskId) {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/files`);
+            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const files = await response.json();
+            const task = await response.json();
             const fileList = document.getElementById('fileList');
 
-            if (files.length === 0) {
+            if (!task.attachments || task.attachments.length === 0) {
                 fileList.innerHTML = '<p style="color: #94a3b8; text-align: center;">No files uploaded for this task.</p>';
             } else {
-                fileList.innerHTML = files.map(file => `
-                    <div class="file-item">
-                        <div class="file-name">
-                            <i class="fas fa-file"></i>
-                            ${file.name}
-                        </div>
-                        <button class="download-btn" onclick="downloadFile('${file.id}', '${file.name}')">
-                            <i class="fas fa-download"></i> Download
-                        </button>
+                fileList.innerHTML = task.attachments.map(file => `
+                <div class="file-item">
+                    <div class="file-name">
+                        <i class="fas fa-file"></i>
+                        ${file.name}
                     </div>
-                `).join('');
+                    <a class="download-btn" href="${file.url}" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-download"></i> View File
+                    </a>
+                </div>
+            `).join('');
             }
 
             document.getElementById('fileModal').style.display = 'block';
@@ -1059,6 +1070,7 @@
             alert('Failed to load task files. Please try again.');
         }
     }
+
 
     async function downloadFile(fileId, fileName) {
         try {
@@ -1105,6 +1117,8 @@
         formData.append('title', title);
         formData.append('description', description);
         formData.append('userEmail', localStorage.getItem('userEmail'));
+        formData.append('userName', localStorage.getItem('userName')); // ✅ NEW
+
 
         if (fileInput.files[0]) {
             formData.append('file', fileInput.files[0]);

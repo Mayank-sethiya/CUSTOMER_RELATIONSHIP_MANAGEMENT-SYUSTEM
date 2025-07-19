@@ -1,4 +1,4 @@
-package com.CustomerRelationshipManagement.service;
+package com.CustomerRelationshipManagement.repository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
