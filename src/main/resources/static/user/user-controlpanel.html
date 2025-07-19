@@ -14,28 +14,28 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #f1f5f9;
+            background: linear-gradient(135deg, #7e93ed 0%, #764ba2 100%);
+            color: rgba(241, 245, 249, 0.67);
             transition: all 0.3s ease;
             min-height: 100vh;
             overflow-y: auto;
         }
 
         body[data-theme="light"] {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #764ba2 0%, #4ba2ff 100%);
             color: #1e293b;
         }
 
         :root {
-            --primary: #a8adb5;
+            --primary: rgb(75, 162, 255);
             --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
+            --text-secondary: #ffffff;
             --border: rgba(71, 85, 105, 0.5);
             --shadow: rgba(0, 0, 0, 0.3);
             --sidebar-bg: #1e293b;
             --card-bg: #1e293b;
             --sidebar-text: #f1f5f9;
-            --sidebar-text-secondary: #94a3b8;
+            --sidebar-text-secondary: #637283;
         }
 
         body[data-theme="light"] {
@@ -43,8 +43,8 @@
             --text-secondary: #64748b;
             --border: rgba(226, 232, 240, 0.5);
             --shadow: rgba(0, 0, 0, 0.1);
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
+            --sidebar-bg: rgba(255, 255, 255, 0.89);
+            --card-bg: rgba(255, 255, 255, 0.89);
             --sidebar-text: #1e293b;
             --sidebar-text-secondary: #64748b;
         }
@@ -52,7 +52,7 @@
         .header {
             background: var(--sidebar-bg);
             backdrop-filter: blur(10px);
-            padding: 20px 30px;
+            padding: 15px 30px;
             box-shadow: 0 2px 20px var(--shadow);
             display: flex;
             justify-content: space-between;
@@ -274,7 +274,7 @@
             padding: 80px 40px 40px;
             transition: margin-left 0.3s ease;
             overflow-y: auto;
-            max-height: calc(100vh - 80px);
+            max-height: calc(100vh - 0px);
         }
 
         .welcome-section {
@@ -396,7 +396,7 @@
 
         .content-placeholder i {
             font-size: 60px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             color: var(--primary);
         }
 
@@ -404,14 +404,14 @@
             font-size: 24px;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .content-placeholder p {
             font-size: 16px;
             line-height: 1.6;
             max-width: 700px;
-            margin: 0 auto;
+            margin: 20px auto;
         }
 
         .toast {
@@ -465,6 +465,7 @@
                 margin-left: 0;
                 padding: 20px;
                 max-height: none;
+
             }
 
             .welcome-stats {
@@ -524,21 +525,9 @@
 
         <div class="nav-section">
             <h6 class="nav-section-title">Tasks</h6>
-            <button class="nav-item">
+            <button class="nav-item" onclick="location.href='view-tasks.html'">
                 <i class="fas fa-tasks"></i>
                 <span>View Tasks</span>
-            </button>
-            <button class="nav-item">
-                <i class="fas fa-plus-circle"></i>
-                <span>Create Task</span>
-            </button>
-        </div>
-
-        <div class="nav-section">
-            <h6 class="nav-section-title">Settings</h6>
-            <button class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Account Settings</span>
             </button>
         </div>
     </nav>
@@ -551,21 +540,23 @@
 
         <div class="welcome-stats">
             <div class="stat-card">
-                <div class="stat-number">24</div>
+                <div class="stat-number">0</div>
                 <div class="stat-label">Open Tasks</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">8</div>
-                <div class="stat-label">Pending Approvals</div>
+                <div class="stat-number" id="completedCount">0</div>
+                <div class="stat-label">Completed Tasks</div>
             </div>
+
             <div class="stat-card">
-                <div class="stat-number">12</div>
+                <div class="stat-number">0</div>
                 <div class="stat-label">New Messages</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">4</div>
-                <div class="stat-label">Upcoming Meetings</div>
+                <div class="stat-number" id="deadlineTimer">00h 00m 00s</div>
+                <div class="stat-label">Deadline Remaining</div>
             </div>
+
         </div>
     </section>
 
@@ -584,145 +575,204 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Get user name from localStorage and update welcome message
-        const userName = localStorage.getItem('userName');
-        const userWelcome = document.getElementById('userWelcome');
-        if (userName) {
-            userWelcome.textContent = `Hi ${userName}!`;
-        }
+    const userName = localStorage.getItem('userName');
+    const userWelcome = document.getElementById('userWelcome');
+    if (userName) userWelcome.textContent = `Hi ${userName}!`;
 
-        // Initialize notification count and start monitoring
-        updateNotificationCount();
-        setupNotificationMonitoring();
+    updateNotificationCount();
+    setupNotificationMonitoring();
+    updateOpenTaskCount();
+    updateNewMessagesCount();
+    updateCompletedTaskCount();
+    startDeadlineCountdown();
 
-        // Theme toggle functionality
-        document.querySelector('.theme-toggle').addEventListener('click', function() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+    const body = document.body;
+    const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+});
 
-        // Notification button functionality
-        document.getElementById('notificationBtn').addEventListener('click', function() {
-            window.open('notification.html', 'notifications', 'width=900,height=700,scrollbars=yes,resizable=yes');
-        });
+    document.getElementById('notificationBtn')?.addEventListener('click', () => {
+    window.location.href = 'notification.html';
+});
 
-        // Profile button functionality
-        document.getElementById('profileBtn').addEventListener('click', function() {
-            window.open('profile.html', 'profile', 'width=1000,height=800,scrollbars=yes,resizable=yes');
-        });
+    document.getElementById('profileBtn')?.addEventListener('click', () => {
+    window.open('profile.html', 'profile', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+});
 
-        // Back button functionality
-        const backButton = document.querySelector('.back-button');
-        if (backButton) {
-            backButton.addEventListener('click', function () {
-                const username = localStorage.getItem('userName');
-                fetch('http://localhost:8080/api/users/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username })
-                }).then(() => {
-                    localStorage.removeItem('userName');
-                    window.location.href = '../index.html';
-                });
-            });
-        }
+    document.querySelector('.back-button')?.addEventListener('click', () => {
+    const username = localStorage.getItem('userName');
+    fetch('http://localhost:8080/api/users/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+}).then(() => {
+    localStorage.removeItem('userName');
+    window.location.href = '../index.html';
+});
+});
 
-        // Logout button functionality
-        const logoutButton = document.querySelector('.logout-btn');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', function () {
-                const username = localStorage.getItem('userName');
-                fetch('http://localhost:8080/api/users/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username })
-                }).then(() => {
-                    localStorage.removeItem('userName');
-                    window.location.href = '../index.html';
-                });
-            });
-        }
+    document.querySelector('.logout-btn')?.addEventListener('click', () => {
+    const username = localStorage.getItem('userName');
+    fetch('http://localhost:8080/api/users/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+}).then(() => {
+    localStorage.removeItem('userName');
+    window.location.href = '../index.html';
+});
+});
 
-        // Listen for messages from child windows
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'updateNotificationCount') {
-                updateNotificationCount();
-            }
-        });
-    });
+    window.addEventListener('message', function (event) {
+    if (event.data?.type === 'updateNotificationCount') {
+    updateNotificationCount();
+} else if (event.data?.type === 'resetCountdown') {
+    clearInterval(window.deadlineInterval);
+    document.getElementById('deadlineTimer').textContent = 'No task in progress';
+    localStorage.removeItem('taskStartTime');
+    localStorage.removeItem('activeTaskId');
+}
+});
+});
 
     function updateNotificationCount() {
-        const count = parseInt(localStorage.getItem('notificationCount') || '0');
-        const badge = document.getElementById('notificationCount');
-
-        if (badge) {
-            badge.textContent = count;
-            badge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
+    const count = parseInt(localStorage.getItem('notificationCount') || '0');
+    const badge = document.getElementById('notificationCount');
+    if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
+}
 
     function setupNotificationMonitoring() {
-        // Listen for localStorage changes
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'notificationCount') {
-                updateNotificationCount();
-            }
-        });
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'notificationCount') {
+            updateNotificationCount();
+            updateNewMessagesCount();
+        }
+    });
 
-        // Function to fetch and count notifications
-        function fetchNotificationCount() {
-            fetch('http://localhost:8080/api/broadcast/all')
-                .then(res => res.json())
-                .then(messages => {
-                    if (messages && messages.length > 0) {
-                        const clearedNotifications = JSON.parse(localStorage.getItem('clearedNotifications') || '[]');
-                        const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+    function fetchNotificationCount() {
+    fetch('http://localhost:8080/api/broadcast/all')
+    .then(res => res.json())
+    .then(messages => {
+    const read = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+    const cleared = JSON.parse(localStorage.getItem('clearedNotifications') || '[]');
+    const now = new Date();
+    const visibleMessages = messages.filter(msg => {
+    const id = msg.id || `${msg.subject}-${msg.createdAt}`;
+    const msgTime = new Date(msg.scheduledTime);
+    return msg.status === "Sent" && msgTime <= now && !cleared.includes(id);
+});
+    const unreadCount = visibleMessages.filter(msg => {
+    const id = msg.id || `${msg.subject}-${msg.createdAt}`;
+    return !read.includes(id);
+}).length;
 
-                        // Filter out cleared notifications
-                        const visibleMessages = messages.filter(msg => {
-                            const notificationId = msg.id || `${msg.subject}-${msg.createdAt}`;
-                            return !clearedNotifications.includes(notificationId);
-                        });
+    const currentCount = parseInt(localStorage.getItem('notificationCount') || '0');
+    if (unreadCount !== currentCount) {
+    localStorage.setItem('notificationCount', unreadCount.toString());
+    updateNotificationCount();
+    window.dispatchEvent(new StorageEvent('storage', {
+    key: 'notificationCount',
+    newValue: unreadCount.toString(),
+    url: window.location.href
+}));
+}
+})
+    .catch(err => console.error('Error fetching notifications:', err));
+}
 
-                        // Count unread notifications
-                        const unreadCount = visibleMessages.filter(msg => {
-                            const notificationId = msg.id || `${msg.subject}-${msg.createdAt}`;
-                            return !readNotifications.includes(notificationId);
-                        }).length;
+    fetchNotificationCount();
+    setInterval(fetchNotificationCount, 10000);
+}
 
-                        // Update count if different from current
-                        const currentCount = parseInt(localStorage.getItem('notificationCount') || '0');
-                        if (unreadCount !== currentCount) {
-                            localStorage.setItem('notificationCount', unreadCount.toString());
-                            updateNotificationCount();
+    function updateOpenTaskCount() {
+    const email = localStorage.getItem('userEmail');
+    if (!email) return;
 
-                            // Trigger storage event manually for same-page updates
-                            window.dispatchEvent(new StorageEvent('storage', {
-                                key: 'notificationCount',
-                                newValue: unreadCount.toString(),
-                                url: window.location.href
-                            }));
-                        }
-                    } else {
-                        // No messages, set count to 0
-                        localStorage.setItem('notificationCount', '0');
-                        updateNotificationCount();
-                    }
-                })
-                .catch(err => {
-                    console.log('Could not fetch notifications for count update:', err);
-                });
+    fetch(`http://localhost:8080/api/tasks/user/${email}`)
+    .then(res => res.json())
+    .then(tasks => {
+    const openTasks = tasks.filter(task => !task.completed).length;
+    document.querySelectorAll('.stat-card .stat-number')[0].textContent = openTasks;
+})
+    .catch(err => console.error('Error fetching tasks:', err));
+}
+
+    function updateCompletedTaskCount() {
+    const email = localStorage.getItem('userEmail');
+    if (!email) return;
+
+    fetch(`http://localhost:8080/api/tasks/user/${email}`)
+    .then(res => res.json())
+    .then(tasks => {
+    const completed = tasks.filter(task => task.status === 'completed').length;
+    document.getElementById('completedCount').textContent = completed;
+})
+    .catch(err => console.error('Error fetching completed tasks:', err));
+}
+
+    function updateNewMessagesCount() {
+    fetch('http://localhost:8080/api/broadcast/all')
+        .then(res => res.json())
+        .then(messages => {
+            const read = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+            const cleared = JSON.parse(localStorage.getItem('clearedNotifications') || '[]');
+            const now = new Date();
+            const newMessages = messages.filter(msg => {
+                const id = msg.id || `${msg.subject}-${msg.createdAt}`;
+                const msgTime = new Date(msg.scheduledTime);
+                return msg.status === "Sent" && msgTime <= now && !read.includes(id) && !cleared.includes(id);
+            });
+            document.querySelectorAll('.stat-card .stat-number')[2].textContent = newMessages.length;
+        })
+        .catch(err => console.error('Error fetching new messages:', err));
+}
+
+    function startDeadlineCountdown() {
+        const start = localStorage.getItem('taskStartTime');
+        const taskId = localStorage.getItem('activeTaskId');
+        if (!start || !taskId) return;
+
+        if (window.deadlineInterval) {
+            clearInterval(window.deadlineInterval);
+            window.deadlineInterval = null;
         }
 
-        // Initial fetch
-        fetchNotificationCount();
+        fetch(`http://localhost:8080/api/tasks/user/${localStorage.getItem('userEmail')}`)
+            .then(res => res.json())
+            .then(tasks => {
+                const task = tasks.find(t => t.id == taskId);
+                if (!task || !task.dueDate) return;
 
-        // Poll for new notifications every 10 seconds for real-time updates
-        setInterval(fetchNotificationCount, 10000);
+                const dueTime = new Date(task.dueDate + 'T23:59:59');
+
+                function updateCountdown() {
+                    const now = new Date();
+                    const diff = dueTime - now;
+
+                    if (diff <= 0) {
+                        clearInterval(window.deadlineInterval);
+                        document.getElementById('deadlineTimer').textContent = 'Deadline passed';
+                        return;
+                    }
+
+                    const hrs = Math.floor(diff / 3600000);
+                    const mins = Math.floor((diff % 3600000) / 60000);
+                    const secs = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('deadlineTimer').textContent = `${hrs}h ${mins}m ${secs}s`;
+                }
+
+                updateCountdown();
+                window.deadlineInterval = setInterval(updateCountdown, 1000);
+            });
     }
+
+
 </script>
+
 </body>
 </html>

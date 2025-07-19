@@ -659,6 +659,13 @@
                 justify-content: center;
             }
         }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.8); }
+        }
+        @keyframes slideOut {
+            to { transform: translateX(100%); opacity: 0; }
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -865,14 +872,7 @@
     }
 
     function goBack() {
-        // Update notification count before closing/navigating
-        updateNotificationCount();
-
-        if (window.opener && !window.opener.closed) {
-            window.close();
-        } else {
-            window.location.href = 'usercontrolpanel.html';
-        }
+        window.location.href = 'user-controlpanel.html';
     }
 
     function getNotificationIcon(type) {
@@ -967,18 +967,6 @@
         return date.toLocaleDateString();
     }
 
-    // Add CSS keyframes for animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeOut {
-            to { opacity: 0; transform: scale(0.8); }
-        }
-        @keyframes slideOut {
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-
     function viewMessage(id, subject, content) {
         const modal = document.getElementById('viewModal');
         const titleEl = document.getElementById('viewSubject');
@@ -1049,16 +1037,34 @@
     }
 
     function loadNotifications() {
+        // Get current user email from localStorage
+        const currentUserEmail = localStorage.getItem('userEmail');
+
         fetch("http://localhost:8080/api/broadcast/all")
             .then(res => res.json())
             .then(messages => {
                 const list = document.getElementById("notificationList");
                 list.innerHTML = ""; // Clear existing
-                messages = messages.filter(msg =>
-                    msg.status?.toLowerCase() === "sent" &&
-                    new Date(msg.scheduledTime) <= new Date()
-                );
 
+                // Filter messages for current user
+                messages = messages.filter(msg => {
+                    // Only show sent messages that are not scheduled for future
+                    if (msg.status?.toLowerCase() !== "sent" || new Date(msg.scheduledTime) > new Date()) {
+                        return false;
+                    }
+
+                    // Show all messages sent to "all users" OR messages specifically sent to this user
+                    if (msg.recipients === "All Users" || msg.recipients === "all-users") {
+                        return true;
+                    }
+
+                    // For particular user messages, check if current user is in recipients
+                    if (currentUserEmail && msg.recipients && msg.recipients.includes(currentUserEmail)) {
+                        return true;
+                    }
+
+                    return false;
+                });
 
                 if (messages.length === 0) {
                     showEmptyState('No notifications', 'You\'re all caught up! No new notifications to display.');

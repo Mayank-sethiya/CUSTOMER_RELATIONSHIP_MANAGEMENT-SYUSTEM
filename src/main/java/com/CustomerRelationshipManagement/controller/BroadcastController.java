@@ -24,25 +24,24 @@ public class BroadcastController {
     public List<BroadcastEntity> getAllMessages() {
         return service.getAllMessages();
     }
+
     @DeleteMapping("/delete/{id}")
     public void deleteMessage(@PathVariable Long id) {
         service.deleteMessageById(id);
     }
+
     @DeleteMapping("/deleteAll")
-    public void deleteAllNotifications() {
-        service.deleteAllNotifications();
+    public void deleteAllMessages() {
+        service.deleteAllMessages();
     }
+
     @GetMapping("/count")
     public long getMessageCount() {
         return service.getMessageCount();
     }
+
     @GetMapping("/pending/count")
     public long countPendingMessages() {
         return service.countPendingMessages();
     }
-
-
-
-
-
 }

@@ -467,6 +467,22 @@
       box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
     }
 
+    .error-message {
+      color: #ef4444;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .success-message {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .main-container {
@@ -540,8 +556,7 @@
     </div>
 
     <div id="usersContainer">
-      <!-- Sample users - will be populated via API -->
-
+      <!-- Users will be populated via API -->
     </div>
   </div>
 </div>
@@ -554,31 +569,37 @@
       <button class="close-btn" onclick="closeModal()">&times;</button>
     </div>
 
+    <div class="success-message" id="successMessage"></div>
+
     <form id="userForm">
       <div class="form-group">
         <label class="form-label" for="userName">Full Name</label>
         <input type="text" id="userName" class="form-input" required>
+        <div class="error-message" id="nameError">Name is required</div>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="userEmail">Email</label>
         <input type="email" id="userEmail" class="form-input" required>
+        <div class="error-message" id="emailError">Valid email is required</div>
       </div>
-
 
       <div class="form-group">
         <label class="form-label" for="userPassword">Password</label>
-        <input type="text" id="userPassword" class="form-input" required>
+        <input type="password" id="userPassword" class="form-input" required>
+        <div class="error-message" id="passwordError">Password is required</div>
       </div>
 
 
 
       <div class="form-group">
-        <label class="form-label" for="userStatus">Status</label>
-        <select id="userStatus" class="form-select" required>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
+        <label class="form-label" for="userPhone">Phone Number</label>
+        <input type="text" id="userPhone" class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="userLocation">Location</label>
+        <input type="text" id="userLocation" class="form-input">
       </div>
 
       <div class="modal-actions">
@@ -588,6 +609,7 @@
     </form>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const adminName = localStorage.getItem('adminName');
@@ -603,7 +625,7 @@
   }
 
   function goBack() {
-    window.location.href = 'admin_controlpanel.html';
+    window.location.href = 'dashboard.html';
   }
 
   function logout() {
@@ -614,25 +636,99 @@
   function openAddUserModal() {
     document.getElementById('modalTitle').textContent = 'Add New User';
     document.getElementById('userForm').reset();
+    document.getElementById('userForm').removeAttribute('data-user-id');
+    hideAllErrors();
+    hideSuccessMessage();
     document.getElementById('userModal').style.display = 'block';
   }
 
   function closeModal() {
     document.getElementById('userModal').style.display = 'none';
+    hideAllErrors();
+    hideSuccessMessage();
+  }
+
+  function hideAllErrors() {
+    const errors = document.querySelectorAll('.error-message');
+    errors.forEach(error => error.style.display = 'none');
+  }
+
+  function hideSuccessMessage() {
+    document.getElementById('successMessage').style.display = 'none';
+  }
+
+  function showError(fieldId, message) {
+    const errorElement = document.getElementById(fieldId + 'Error');
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+  }
+
+  function showSuccess(message) {
+    const successElement = document.getElementById('successMessage');
+    successElement.textContent = message;
+    successElement.style.display = 'block';
+  }
+
+  function validateForm() {
+    hideAllErrors();
+    let isValid = true;
+
+    const name = document.getElementById('userName').value.trim();
+    const email = document.getElementById('userEmail').value.trim();
+    const password = document.getElementById('userPassword').value.trim();
+
+    if (!name) {
+      showError('name', 'Name is required');
+      isValid = false;
+    }
+
+    if (!email) {
+      showError('email', 'Email is required');
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('email', 'Please enter a valid email address');
+      isValid = false;
+    }
+
+    if (!password) {
+      showError('password', 'Password is required');
+      isValid = false;
+    } else if (password.length < 6) {
+      showError('password', 'Password must be at least 6 characters long');
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   function loadUsers() {
     fetch('http://localhost:8080/api/users')
-            .then(res => res.json())
-            .then(users => displayUsers(users));
+            .then(res => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch users');
+              }
+              return res.json();
+            })
+            .then(users => displayUsers(users))
+            .catch(error => {
+              console.error('Error loading users:', error);
+              alert('Error loading users. Please try again.');
+            });
   }
 
   function displayUsers(users) {
     const container = document.getElementById('usersContainer');
     container.innerHTML = "";
 
+    if (!users || users.length === 0) {
+      container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No users found</div>';
+      return;
+    }
+
     users.forEach(user => {
-      const initials = user.username.slice(0, 2).toUpperCase();
+      const initials = (user.username || 'U').slice(0, 2).toUpperCase();
       const statusValue = user.status && user.status.toLowerCase() === 'active' ? 'active' : 'inactive';
       const statusClass = statusValue === 'active' ? 'status-active' : 'status-inactive';
       const capitalStatus = statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
@@ -640,9 +736,9 @@
       const userRow = `
       <div class="user-row">
         <div class="user-avatar">${initials}</div>
-        <div>${user.username}</div>
-        <div>${user.email}</div>
-        <div>${user.password}</div>
+        <div>${user.username || 'N/A'}</div>
+        <div>${user.email || 'N/A'}</div>
+        <div>${user.password ? '••••••••' : 'N/A'}</div>
         <div><span class="user-status ${statusClass}">${capitalStatus}</span></div>
         <div class="user-actions">
           <button class="action-btn edit-btn" onclick="editUser(${user.id})"><i class="fas fa-edit"></i></button>
@@ -653,16 +749,24 @@
     });
   }
 
-
   document.getElementById('searchInput').addEventListener('input', function (e) {
     const keyword = e.target.value.trim();
 
     if (keyword === "") {
       loadUsers();
     } else {
-      fetch(`http://localhost:8080/api/users/search?keyword=${keyword}`)
-              .then(res => res.json())
-              .then(users => displayUsers(users));
+      fetch(`http://localhost:8080/api/users/search?keyword=${encodeURIComponent(keyword)}`)
+              .then(res => {
+                if (!res.ok) {
+                  throw new Error('Search failed');
+                }
+                return res.json();
+              })
+              .then(users => displayUsers(users))
+              .catch(error => {
+                console.error('Search error:', error);
+                displayUsers([]);
+              });
     }
   });
 
@@ -673,25 +777,34 @@
               const user = users.find(u => u.id === userId);
               if (user) {
                 document.getElementById('modalTitle').textContent = 'Edit User';
-                document.getElementById('userName').value = user.username;
-                document.getElementById('userEmail').value = user.email;
-                // Optional: prefill other fields if available
+                document.getElementById('userName').value = user.username || '';
+                document.getElementById('userEmail').value = user.email || '';
+                document.getElementById('userPassword').value = ''; // Don't prefill password for security
+
+                document.getElementById('userPhone').value = user.phonenumber || '';
+                document.getElementById('userLocation').value = user.location || '';
+
+                hideAllErrors();
+                hideSuccessMessage();
                 document.getElementById('userModal').style.display = 'block';
                 document.getElementById('userForm').setAttribute('data-user-id', userId);
               }
+            })
+            .catch(error => {
+              console.error('Error loading user for edit:', error);
+              alert('Error loading user data. Please try again.');
             });
   }
 
-
   function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user?')) {
-      console.log("Deleting user with ID:", userId); // Debug log
+      console.log("Deleting user with ID:", userId);
 
       fetch(`http://localhost:8080/api/users/${userId}`, {
         method: 'DELETE'
       })
               .then(res => {
-                console.log("Response status:", res.status); // Debug log
+                console.log("Response status:", res.status);
                 if (!res.ok) {
                   return res.text().then(text => {
                     throw new Error(text || 'Failed to delete user');
@@ -712,15 +825,24 @@
 
   document.getElementById('userForm').addEventListener('submit', function (e) {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     const userId = e.target.getAttribute('data-user-id');
     const formData = {
-      username: document.getElementById('userName').value,
-      email: document.getElementById('userEmail').value
+      username: document.getElementById('userName').value.trim(),
+      email: document.getElementById('userEmail').value.trim(),
+      password: document.getElementById('userPassword').value.trim(),
+      status: document.getElementById('userStatus').value,
+      phonenumber: document.getElementById('userPhone').value.trim() || "",
+      location: document.getElementById('userLocation').value.trim() || ""
     };
 
-    const passwordInput = document.getElementById('userPassword').value;
-    if (passwordInput.trim() !== "") {
-      formData.password = passwordInput;
+    // For edit mode, only include password if it's provided
+    if (userId && !formData.password) {
+      delete formData.password;
     }
 
     const method = userId ? 'PUT' : 'POST';
@@ -734,18 +856,40 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(formData)
-    }).then(() => {
-      closeModal();
-      loadUsers();
-      e.target.removeAttribute('data-user-id');
-    });
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(text => {
+                  throw new Error(text || 'Failed to save user');
+                });
+              }
+              return res.json();
+            })
+            .then(() => {
+              showSuccess(userId ? 'User updated successfully!' : 'User created successfully!');
+              setTimeout(() => {
+                closeModal();
+                loadUsers();
+                e.target.removeAttribute('data-user-id');
+              }, 1500);
+            })
+            .catch(error => {
+              console.error('Error saving user:', error);
+              alert('Error saving user: ' + error.message);
+            });
   });
 
-
-
+  // Close modal when clicking outside
   window.addEventListener('click', function (e) {
     const modal = document.getElementById('userModal');
     if (e.target === modal) closeModal();
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
   });
 </script>
 

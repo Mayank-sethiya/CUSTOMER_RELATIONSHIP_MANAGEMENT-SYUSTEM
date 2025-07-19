@@ -2,11 +2,15 @@ package com.CustomerRelationshipManagement.controller;
 
 import com.CustomerRelationshipManagement.entity.UserEntity;
 import com.CustomerRelationshipManagement.repository.UserRepository;
+import com.CustomerRelationshipManagement.service.ContactService;
 import com.CustomerRelationshipManagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -18,24 +22,39 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ContactService contactService;
+
 
 
     @PostMapping("/register")
-    public UserEntity register(@RequestBody UserEntity user) {
-        return userService.registerUser(user);
-    }
+    public ResponseEntity<?> register(@RequestBody UserEntity user) {
+        try {
+            UserEntity newUser = userService.registerUser(user);
 
-    @PostMapping("/login")
-    public String login(@RequestBody UserEntity user) {
-        UserEntity existing = userService.loginUser(user.getUsername(), user.getPassword());
-        if (existing != null) {
-            existing.setStatus("active");  // ✅ Set status to active
-            userRepository.save(existing); // ✅ Save update
-            return "Login successful! Welcome " + existing.getUsername();
-        } else {
-            return "Login failed. Invalid credentials.";
+            // Check and qualify lead if email matches
+            contactService.qualifyLeadByEmail(user.getEmail());
+
+            return ResponseEntity.ok(newUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
+
+    @PostMapping("/login")
+    public UserEntity login(@RequestBody UserEntity user) {
+        UserEntity existing = userService.loginUser(user.getUsername(), user.getPassword());
+        if (existing != null) {
+            existing.setStatus("active");
+            userRepository.save(existing);
+            return existing; // 🔁 Return full user info
+        } else {
+            return null;
+        }
+    }
+
     @PostMapping("/logout")
     public String logout(@RequestBody UserEntity user) {
         UserEntity existing = userRepository.findByUsername(user.getUsername());
@@ -73,6 +92,19 @@ public class UserController {
     @GetMapping("/count")
     public long getUserCount() {
         return userService.countUsers();
+    }
+
+
+
+    @GetMapping("/count/recent")
+    public long getRecentSignupCount() {
+        LocalDateTime last24hrs = LocalDateTime.now().minusHours(24);
+        return userRepository.countByCreatedAtAfter(last24hrs);
+    }
+
+    @GetMapping("/signups/monthly")
+    public Map<String, Object> getMonthlySignups() {
+        return userService.getMonthlySignupData();
     }
 
 

@@ -2,6 +2,7 @@ package com.CustomerRelationshipManagement.entity;
 
 import jakarta.persistence.*;
         import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -29,6 +30,15 @@ public class UserEntity {
     private String location;
 
     private String status; // "active" or "inactive"
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
 
 
 

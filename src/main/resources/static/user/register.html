@@ -890,6 +890,9 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        let response;
+
+
         const username = document.getElementById('username').value;
         const email = document.getElementById('email').value;
         const countrycode = document.getElementById('countrycode').value;
@@ -925,6 +928,7 @@
         registerBtn.classList.add('loading');
         registerBtn.disabled = true;
         registerBtn.innerHTML = '<i class="fas fa-spinner loading"></i> Creating Account...';
+
 
         try {
             const response = await fetch('http://localhost:8080/api/users/register', {
@@ -963,6 +967,7 @@
                 const errorText = await response.text();
                 showMessage(errorText || 'Registration failed. Please try again.', 'error');
             }
+
         } catch (error) {
             showMessage('Unable to connect to server. Please check your connection and try again.', 'error');
         } finally {
