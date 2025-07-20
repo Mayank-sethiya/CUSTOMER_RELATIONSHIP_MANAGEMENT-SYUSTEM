@@ -735,7 +735,10 @@
     function startDeadlineCountdown() {
         const start = localStorage.getItem('taskStartTime');
         const taskId = localStorage.getItem('activeTaskId');
-        if (!start || !taskId) return;
+        if (!start || !taskId) {
+            stopDeadlineCountdown();
+            return;
+        }
 
         if (window.deadlineInterval) {
             clearInterval(window.deadlineInterval);
@@ -746,17 +749,22 @@
             .then(res => res.json())
             .then(tasks => {
                 const task = tasks.find(t => t.id == taskId);
-                if (!task || !task.dueDate) return;
+                if (!task || !task.dueDate) {
+                    stopDeadlineCountdown();
+                    return;
+                }
 
                 const dueTime = new Date(task.dueDate + 'T23:59:59');
-
                 function updateCountdown() {
                     const now = new Date();
                     const diff = dueTime - now;
 
                     if (diff <= 0) {
                         clearInterval(window.deadlineInterval);
+                        window.deadlineInterval = null;
                         document.getElementById('deadlineTimer').textContent = 'Deadline passed';
+                        // Optional: Auto-refresh dashboard/statistics after timer ends
+                        // setTimeout(() => location.reload(), 1000);
                         return;
                     }
 
@@ -770,6 +778,16 @@
                 window.deadlineInterval = setInterval(updateCountdown, 1000);
             });
     }
+
+    function stopDeadlineCountdown() {
+        if (window.deadlineInterval) {
+            clearInterval(window.deadlineInterval);
+            window.deadlineInterval = null;
+        }
+        const timerDisplay = document.getElementById('deadlineTimer');
+        if (timerDisplay) timerDisplay.textContent = 'No task in progress';
+    }
+
 
 
 </script>

@@ -945,71 +945,70 @@
             `;
     }
 
+    // Call this when user marks a task as "In Progress"
     async function markTaskInProgress(taskId) {
         try {
             const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/inprogress`, {
                 method: 'PUT'
             });
+            if (!response.ok) throw new Error("Task status update failed.");
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error("Task status update failed: " + errorText);
-            }
+            localStorage.setItem('activeTaskId', String(taskId));
+            localStorage.setItem('taskStartTime', new Date().toISOString());
+            window.dispatchEvent(new Event('storage'));
 
-            // Optionally try to parse the body (but safely!)
-            let updatedTask;
-            try {
-                updatedTask = await response.json();
-            } catch (e) {
-                updatedTask = null; // maybe empty response body
-            }
-
+            // ✅ IMMEDIATE UI UPDATE, no reload needed:
             const task = allTasks.find(t => t.id === taskId);
             if (task) {
                 task.status = 'in-progress';
-                filterTasks(currentFilter);
             }
+            filterTasks(currentFilter); // or displayTasks(allTasks) or your preferred refresh
 
-            alert("✅ Task marked In Progress!");
+            // Remove or comment out the alert:
+            // alert("✅ Task marked In Progress!");
 
         } catch (error) {
+            // Remove or comment out the error alert:
+            // alert("❌ Failed to mark task as In Progress.\n" + error.message);
             console.error("Error:", error);
-            alert("❌ Failed to mark task as In Progress.\n" + error.message);
         }
     }
 
 
+    // Call this when user marks a task as "Complete"
     async function markTaskComplete(taskId) {
         try {
             const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/complete`, {
                 method: 'PUT'
             });
+            if (!response.ok) throw new Error("Task complete failed.");
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error("Task complete failed: " + errorText);
-            }
-
-            let updatedTask;
-            try {
-                updatedTask = await response.json();
-            } catch (e) {
-                updatedTask = null;
-            }
-
+            // ✅ Update in-memory task status for instant UI feedback:
             const task = allTasks.find(t => t.id === taskId);
             if (task) {
                 task.status = 'completed';
-                filterTasks(currentFilter);
+            }
+            filterTasks(currentFilter); // or displayTasks(allTasks), if that's your render function
+
+            // ✅ Remove timer if this is the task being timed:
+            if (localStorage.getItem('activeTaskId') == String(taskId)) {
+                localStorage.removeItem('activeTaskId');
+                localStorage.removeItem('taskStartTime');
+                window.dispatchEvent(new Event('storage'));
+                if (typeof stopDeadlineCountdown === "function") stopDeadlineCountdown();
             }
 
-            alert("✅ Task marked as complete!");
+            // ❌ REMOVE THIS:
+            // alert("✅ Task marked as complete!");
 
         } catch (error) {
-            console.error("Error marking task complete:", error);
-            alert("❌ Failed to mark task as complete.\n" + error.message);
+            // ❌ REMOVE THIS TOO FOR NO ALERTS:
+            // alert("❌ Failed to mark task as complete.\n" + error.message);
+            // Instead, just log:
+            console.error(error);
         }
     }
+
 
 
     async function markTaskIncomplete(taskId) {
