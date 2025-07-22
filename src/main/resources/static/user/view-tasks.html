@@ -841,6 +841,10 @@
 </div>
 <script src="../config.js"></script>
 <script>
+    const FILE_API = `${BASE_BACKEND_URL}/api/tasks/files`; // 👈 ✅ FILE download endpoint
+</script>
+
+<script>
     let allTasks = [];
     let currentFilter = 'all';
 
@@ -1059,17 +1063,18 @@
                 fileList.innerHTML = '<p style="color: #94a3b8; text-align: center;">No files uploaded for this task.</p>';
             } else {
                 fileList.innerHTML = task.attachments.map(file => `
-                <div class="file-item">
-                    <div class="file-name">
-                        <i class="fas fa-file"></i>
-                        ${file.name}
-                    </div>
-                  <button class="download-btn" onclick="downloadFile('${file.id}', '${file.name}')">
-  <i class="fas fa-download"></i> Download
-</button>
+  <div class="file-item">
+    <div class="file-name">
+      <i class="fas fa-file"></i>
+      ${file.name}
+    </div>
 
-                </div>
-            `).join('');
+    <a href="${file.url}" target="_blank" class="download-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+      <i class="fas fa-eye"></i> View
+    </a>
+  </div>
+`).join('');
+
             }
 
             document.getElementById('fileModal').style.display = 'block';
@@ -1080,29 +1085,7 @@
     }
 
 
-    async function downloadFile(fileId, fileName) {
-        try {
-            const response = await fetch(`${FILE_API}/${fileId}`);
 
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Error downloading file:', error);
-            alert('Failed to download file. Please try again.');
-        }
-    }
 
     function sendTaskReport(taskId) {
         const task = allTasks.find(t => t.id === taskId);

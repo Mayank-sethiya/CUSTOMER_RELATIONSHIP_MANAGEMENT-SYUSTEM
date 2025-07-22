@@ -1038,7 +1038,7 @@
 
         setInterval(updateRecipientCount, 10000);
         setInterval(loadMessageCount, 1000);
-        setInterval(loadRecentBroadcasts, 300);
+        setInterval(loadRecentBroadcasts, 3000);
         setInterval(loadPendingCount, 1000);
     });
 
@@ -1319,9 +1319,15 @@
 
     // Send message
     function sendMessage() {
+        const submitBtn = document.querySelector('#messageForm button[type="submit"]');
+        submitBtn.disabled = true;
+
         getMessageData()
             .then(messageData => {
-                if (!messageData || !validateMessage(messageData)) return;
+                if (!messageData || !validateMessage(messageData)) {
+                    submitBtn.disabled = false;
+                    return;
+                }
 
                 fetch(`${BROADCAST_API}/send`, {
                     method: "POST",
@@ -1329,6 +1335,7 @@
                     body: JSON.stringify(messageData)
                 })
                     .then(response => {
+                        submitBtn.disabled = false;
                         if (response.ok) {
                             alert("Message sent successfully!");
                             resetForm();
@@ -1338,15 +1345,12 @@
                         }
                     })
                     .catch(error => {
-                        console.error("Error:", error);
+                        submitBtn.disabled = false;
                         alert("Error sending message.");
                     });
-            })
-            .catch(error => {
-                console.error("Error getting message data:", error);
-                alert("Error preparing message data.");
             });
     }
+
 
     // FIXED: Get message data from form - now properly handles "all-users" case
     async function getMessageData() {
