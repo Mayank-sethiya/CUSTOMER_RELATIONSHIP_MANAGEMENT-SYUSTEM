@@ -6,6 +6,7 @@
     <title>Admin Portal - TrackForce CRM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             /* Light theme variables */
@@ -675,8 +676,14 @@
         </a>
     </div>
 </div>
+<!-- Load configuration (API base URLs) -->
+<script src="../config.js"></script>
+
+<!-- Your JS is already inline and below this -->
 
 <script>
+
+
     // Theme functionality
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
@@ -712,17 +719,16 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
-        // Hide previous messages
         errorDiv.style.display = 'none';
         successDiv.style.display = 'none';
 
-        // Show loading state
         loginButton.classList.add('loading');
         loginButton.disabled = true;
         loginButton.innerHTML = '<i class="fas fa-spinner loading"></i> Signing In...';
 
         try {
-            const response = await fetch('http://localhost:8080/api/admin/login', {
+            const response = await fetch(`${ADMIN_API}/login`, {
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -731,15 +737,10 @@
             if (response.ok) {
                 const message = await response.text();
                 if (message === "success") {
-                    // Store admin username in localStorage
                     localStorage.setItem('adminName', username);
-
                     showSuccess('🎉 Login successful! Redirecting to admin panel...');
-
-                    // Success animation
                     loginButton.innerHTML = '<i class="fas fa-check"></i> Access Granted!';
                     loginButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-
                     setTimeout(() => {
                         window.location.href = "dashboard.html";
                     }, 2000);
@@ -776,23 +777,20 @@
         loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access Admin Panel';
     }
 
-    // Add input validation feedback
+    // Input validation feedback
     const inputs = document.querySelectorAll('input[required]');
     inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.value.trim() === '') {
-                this.style.borderColor = 'var(--error-color)';
-            } else {
-                this.style.borderColor = 'var(--success-color)';
-            }
+        input.addEventListener('blur', function () {
+            this.style.borderColor = this.value.trim() === '' ? 'var(--error-color)' : 'var(--success-color)';
         });
 
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             if (this.style.borderColor === 'var(--error-color)' && this.value.trim() !== '') {
                 this.style.borderColor = 'var(--input-border)';
             }
         });
     });
+
 </script>
 </body>
 </html>

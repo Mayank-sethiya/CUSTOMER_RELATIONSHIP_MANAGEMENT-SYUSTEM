@@ -6,6 +6,7 @@
     <title>Dashboard - TrackForce CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         /* General Styles */
         * {
@@ -392,11 +393,14 @@
             margin-bottom: 15px;
         }
 
+        /* Fixed scrollbar issue - added proper spacing and overflow handling */
         .activity-list {
             list-style: none;
             padding: 0;
             max-height: 300px;
             overflow-y: auto;
+            padding-right: 8px; /* Add space for scrollbar */
+            margin-right: -8px; /* Offset the padding to maintain alignment */
         }
 
         .activity-item {
@@ -405,6 +409,7 @@
             gap: 15px;
             padding: 12px 0;
             border-bottom: 1px solid var(--border);
+            margin-right: 8px; /* Ensure delete button has space from scrollbar */
         }
 
         .activity-item:last-child {
@@ -420,6 +425,7 @@
             justify-content: center;
             font-size: 14px;
             color: white;
+            flex-shrink: 0; /* Prevent icon from shrinking */
         }
 
         .activity-icon.user { background: #3498db; }
@@ -430,6 +436,7 @@
 
         .activity-content {
             flex: 1;
+            margin-right: 12px; /* Space between content and delete button */
         }
 
         .activity-title {
@@ -554,6 +561,25 @@
         .status-active { background: #d4edda; color: #155724; }
         .status-pending { background: #fff3cd; color: #856404; }
         .status-inactive { background: #f8d7da; color: #721c24; }
+
+        /* Custom scrollbar styling */
+        .activity-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: rgba(71, 85, 105, 0.2);
+            border-radius: 3px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: 3px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8);
+        }
 
         /* Toast Notification Styles */
         .toast {
@@ -817,7 +843,11 @@
 <div class="toast warning">Warning message here</div>
 <div class="toast error">Error message here</div>
 
+<script src="../config.js"></script>
+
+
 <script>
+
     document.addEventListener('DOMContentLoaded', function () {
         // Get admin name from localStorage and update welcome message
         const adminName = localStorage.getItem('adminName');
@@ -886,14 +916,14 @@
         activityList.innerHTML = '<li style="text-align: center; padding: 20px; color: var(--text-secondary);">Loading activities...</li>';
 
         Promise.all([
-            fetch("http://localhost:8080/api/broadcast/all").then(res => {
+            fetch(`${BROADCAST_API}/all`).then(res => {
                 console.log('Broadcast API response status:', res.status);
                 return res.ok ? res.json() : [];
             }).catch(err => {
                 console.error('Error fetching broadcasts:', err);
                 return [];
             }),
-            fetch('http://localhost:8080/api/users').then(res => {
+            fetch('${USER_API}').then(res => {
                 console.log('Users API response status:', res.status);
                 return res.ok ? res.json() : [];
             }).catch(err => {
@@ -960,7 +990,7 @@
 
                     let deleteButton = '';
                     if (activity.type === 'broadcast' && activity.id) {
-                        deleteButton = `<i class="fas fa-trash" style="margin-left:10px; cursor:pointer; color: #e74c3c;" onclick="deleteMessage(${activity.id})"></i>`;
+                        deleteButton = `<i class="fas fa-trash" style="margin-left:10px; cursor:pointer; color: #e74c3c; flex-shrink: 0; min-width: 20px;" onclick="deleteMessage(${activity.id})"></i>`;
                     }
 
                     item.innerHTML = `
@@ -987,7 +1017,7 @@
     // Delete message function for broadcasts
     function deleteMessage(id) {
         if (confirm('Are you sure you want to delete this broadcast message?')) {
-            fetch(`http://localhost:8080/api/broadcast/${id}`, {
+            fetch(`${BROADCAST_API}/delete/${id}`, {
                 method: 'DELETE'
             })
                 .then(response => {
@@ -1007,7 +1037,7 @@
 
     function initializeCharts() {
         // Line Chart for Monthly Signups
-        fetch("http://localhost:8080/api/users/signups/monthly")
+        fetch(`${USER_API}/signups/monthly`)
             .then(res => res.json())
             .then(signupData => {
                 const revenueCtx = document.getElementById('revenueChart').getContext('2d');
@@ -1059,14 +1089,14 @@
             });
 
         // Doughnut Chart for Users
-        fetch("http://localhost:8080/api/users")
+        fetch(`${USER_API}`)
             .then(res => res.json())
             .then(users => {
                 const active = users.filter(u => u.status === 'active').length;
                 const inactive = users.filter(u => u.status === 'inactive').length;
                 const total = users.length;
 
-                fetch("http://localhost:8080/api/support/count")
+                fetch(`${CONTACT_API}/count`)
                     .then(res => res.json())
                     .then(leads => {
                         const userCtx = document.getElementById('userChart').getContext('2d');
@@ -1122,9 +1152,9 @@
         showToast('Preparing data export...', 'warning');
 
         Promise.all([
-            fetch('http://localhost:8080/api/users').then(res => res.json()).catch(() => []),
-            fetch("http://localhost:8080/api/broadcast/all").then(res => res.json()).catch(() => []),
-            fetch("http://localhost:8080/api/support/count").then(res => res.json()).catch(() => 0)
+            fetch('${USER_API}').then(res => res.json()).catch(() => []),
+            fetch(`${BROADCAST_API}/all`).then(res => res.json()).catch(() => []),
+            fetch(`${CONTACT_API}/count`).then(res => res.json()).catch(() => 0)
         ])
             .then(([users, broadcasts, leadCount]) => {
                 // Create CSV content
@@ -1171,9 +1201,9 @@
         showToast('Generating dashboard report...', 'warning');
 
         Promise.all([
-            fetch('http://localhost:8080/api/users').then(res => res.json()).catch(() => []),
-            fetch("http://localhost:8080/api/broadcast/all").then(res => res.json()).catch(() => []),
-            fetch("http://localhost:8080/api/support/count").then(res => res.json()).catch(() => 0)
+            fetch('${USER_API}').then(res => res.json()).catch(() => []),
+            fetch(`${BROADCAST_API}/all`).then(res => res.json()).catch(() => []),
+            fetch(`${CONTACT_API}/count`).then(res => res.json()).catch(() => 0)
         ])
             .then(([users, broadcasts, leadCount]) => {
                 const activeUsers = users.filter(u => u.status === 'active').length;
@@ -1321,8 +1351,9 @@
     }, 30000);
 
     function loadRecentUsers() {
-        fetch('http://localhost:8080/api/users')
-            .then(res => res.json())
+        fetch(`${USER_API}`)
+
+                .then(res => res.json())
             .then(users => {
                 users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 const recent = users.slice(0, 5);
@@ -1360,7 +1391,7 @@
     }
 
     function updateDashboardData() {
-        fetch("http://localhost:8080/api/users")
+        fetch(`${USER_API}`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById("userCount").textContent = data.length;
@@ -1368,7 +1399,7 @@
                 const activeUsers = data.filter(user => user.status === 'active');
                 document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = activeUsers.length;
 
-                fetch("http://localhost:8080/api/users/count/recent")
+                fetch(`${USER_API}/count/recent`)
                     .then(res => res.json())
                     .then(recentCount => {
                         document.getElementById("signupCount").textContent = recentCount;
@@ -1377,7 +1408,7 @@
             .catch(error => console.error("Error fetching users:", error));
 
         // ✅ Fetch and update lead count
-        fetch("http://localhost:8080/api/support/count")
+        fetch(`${CONTACT_API}/count`)
             .then(res => res.json())
             .then(count => {
                 document.getElementById("leadCount").textContent = count;

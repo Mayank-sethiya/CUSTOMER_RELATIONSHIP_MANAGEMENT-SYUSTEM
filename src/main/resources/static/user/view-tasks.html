@@ -6,6 +6,7 @@
     <title>View Tasks - TrackForce CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -838,7 +839,7 @@
         </form>
     </div>
 </div>
-
+<script src="../config.js"></script>
 <script>
     let allTasks = [];
     let currentFilter = 'all';
@@ -856,7 +857,8 @@
             }
 
             console.log('Loading tasks for email:', email);
-            const response = await fetch(`http://localhost:8080/api/tasks/user/${email}`);
+            const response = await fetch(`${TASK_API}/user/${email}`);
+
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -948,7 +950,8 @@
     // Call this when user marks a task as "In Progress"
     async function markTaskInProgress(taskId) {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/inprogress`, {
+            const response = await fetch(`${TASK_API}/${taskId}/inprogress`, {
+
                 method: 'PUT'
             });
             if (!response.ok) throw new Error("Task status update failed.");
@@ -978,7 +981,8 @@
     // Call this when user marks a task as "Complete"
     async function markTaskComplete(taskId) {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/complete`, {
+            const response = await fetch(`${TASK_API}/${taskId}/complete`, {
+
                 method: 'PUT'
             });
             if (!response.ok) throw new Error("Task complete failed.");
@@ -1014,7 +1018,8 @@
     async function markTaskIncomplete(taskId) {
         try {
             console.log(`Marking task ${taskId} as incomplete`);
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/incomplete`, {
+            const response = await fetch(`${TASK_API}/${taskId}/incomplete`, {
+
                 method: 'PUT'
             });
 
@@ -1038,7 +1043,10 @@
 
     async function viewTaskFiles(taskId) {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`);
+            const response = await fetch(`${TASK_API}/${taskId}`);
+
+
+
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1056,9 +1064,10 @@
                         <i class="fas fa-file"></i>
                         ${file.name}
                     </div>
-                    <a class="download-btn" href="${file.url}" target="_blank" rel="noopener noreferrer">
-                        <i class="fas fa-download"></i> View File
-                    </a>
+                  <button class="download-btn" onclick="downloadFile('${file.id}', '${file.name}')">
+  <i class="fas fa-download"></i> Download
+</button>
+
                 </div>
             `).join('');
             }
@@ -1073,7 +1082,8 @@
 
     async function downloadFile(fileId, fileName) {
         try {
-            const response = await fetch(`http://localhost:8080/api/files/${fileId}`);
+            const response = await fetch(`${FILE_API}/${fileId}`);
+
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1124,7 +1134,8 @@
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/reports', {
+            const response = await fetch(`${REPORT_API}`, {
+
                 method: 'POST',
                 body: formData
             });

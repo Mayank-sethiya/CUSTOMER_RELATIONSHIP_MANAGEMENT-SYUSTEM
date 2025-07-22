@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Broadcast Messaging - TrackForce CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         /* General Styles - Same as other pages */
         * {
@@ -23,7 +24,7 @@
         }
 
         body[data-theme="light"] {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #4ba2ff 0%, #b500ed 100%);
             color: #1e293b;
         }
 
@@ -111,7 +112,7 @@
             height: 40px;
             border-radius: 50%;
             border: none;
-            background: rgba(99, 102, 241, 0.2);
+            background: rgb(180, 208, 237);
             color: var(--primary);
             cursor: pointer;
             display: flex;
@@ -1013,9 +1014,10 @@
         <div id="historyList"></div>
     </div>
 </div>
-
-
+<!-- Load configuration for API endpoints first -->
+<script src="../config.js"></script>
 <script>
+
     let allUsers = [];
     let selectedUsers = new Set();
     let currentRecipientType = '';
@@ -1132,7 +1134,7 @@
         const totalDisplay = document.getElementById('totalRecipients');
 
         if (currentRecipientType === 'all-users') {
-            fetch("http://localhost:8080/api/users/count")
+            fetch(`${USER_API}/count`)
                 .then(res => res.json())
                 .then(count => {
                     totalDisplay.textContent = count;
@@ -1150,7 +1152,7 @@
     // Load users for broadcast
     async function loadBroadcastUsers() {
         try {
-            const res = await fetch("http://localhost:8080/api/users");
+            const res = await fetch(`${USER_API}`);
             allUsers = await res.json();
 
             displayUsers(allUsers);
@@ -1321,7 +1323,7 @@
             .then(messageData => {
                 if (!messageData || !validateMessage(messageData)) return;
 
-                fetch("http://localhost:8080/api/broadcast/send", {
+                fetch(`${BROADCAST_API}/send`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(messageData)
@@ -1354,7 +1356,7 @@
             // If allUsers is empty, fetch all users
             if (allUsers.length === 0) {
                 try {
-                    const res = await fetch("http://localhost:8080/api/users");
+                    const res = await fetch(`${USER_API}`);
                     allUsers = await res.json();
                 } catch (error) {
                     console.error("Failed to load users", error);
@@ -1425,7 +1427,7 @@
     }
 
     function loadRecentBroadcasts() {
-        fetch("http://localhost:8080/api/broadcast/all")
+        fetch(`${BROADCAST_API}/all`)
             .then(res => res.json())
             .then(data => {
                 const container = document.getElementById("historyList");
@@ -1471,7 +1473,7 @@
     function deleteMessage(id) {
         if (!confirm("Delete this message?")) return;
 
-        fetch(`http://localhost:8080/api/broadcast/delete/${id}`, {
+        fetch(`${BROADCAST_API}/delete/${id}`, {
             method: "DELETE"
         })
             .then(() => {
@@ -1487,7 +1489,7 @@
     function deleteAllMessages() {
         if (!confirm("Are you sure you want to delete all broadcast messages?")) return;
 
-        fetch("http://localhost:8080/api/broadcast/deleteAll", {
+        fetch(`${BROADCAST_API}/deleteAll`, {
             method: "DELETE"
         })
             .then(response => {
@@ -1506,7 +1508,7 @@
     }
 
     function loadMessageCount() {
-        fetch("http://localhost:8080/api/broadcast/count")
+        fetch(`${BROADCAST_API}/count`)
             .then(res => res.text())
             .then(count => {
                 document.getElementById("messageCount").textContent = count;
@@ -1515,7 +1517,7 @@
     }
 
     function loadPendingCount() {
-        fetch("http://localhost:8080/api/broadcast/pending/count")
+        fetch(`${BROADCAST_API}/pending/count`)
             .then(res => res.text())
             .then(count => {
                 document.getElementById("pendingCount").textContent = count;

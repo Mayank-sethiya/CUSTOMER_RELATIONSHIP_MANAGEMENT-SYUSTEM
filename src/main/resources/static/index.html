@@ -1823,7 +1823,10 @@
   <i class="fas fa-arrow-up"></i>
 </button>
 
+<script src="config.js"></script>
+
 <script>
+
   // Contact Form Functions
   function showContactForm()
   {
@@ -1885,39 +1888,47 @@
     }, 1000);
   }
 
-  // Handle contact form submission
-  async function handleContactForm(event) {
-    event.preventDefault();
 
-    const lead = {
-      name: document.getElementById("name").value,
-      email: document.getElementById("email").value,
-      phone: document.getElementById("phone").value,
-      company: document.getElementById("company").value,
-      description: document.getElementById("problemDescription").value,
-      status: "new",
-      date: new Date().toISOString().split("T")[0]
-    };
 
-    try {
-      const res = await fetch("http://localhost:8080/api/support", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(lead)
-      });
 
-      if (res.ok) {
-        alert("Lead submitted successfully!");
-        document.getElementById("contactForm").reset();
-        hideContactForm();
-      } else {
-        alert("Failed to submit lead.");
-      }
-    } catch (err) {
-      console.error("Submission error:", err);
-      alert("Something went wrong. Try again.");
+
+    // Handle contact form submission
+    async function handleContactForm(event) {
+        event.preventDefault();
+
+        const lead = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            company: document.getElementById("company").value,
+            description: document.getElementById("problemDescription").value,
+            status: "new",
+            date: new Date().toISOString().split("T")[0]
+        };
+
+        try {
+          const res = await fetch(`${CONTACT_API}`, {
+
+
+            method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(lead)
+            });
+
+            if (res.ok) {
+              showToast("Thank you! We'll get back to you shortly.", "success");
+
+              document.getElementById("contactForm").reset();
+                hideContactForm();
+            } else {
+                alert("Failed to submit lead.");
+            }
+        } catch (err) {
+            console.error("Submission error:", err);
+            alert("Something went wrong. Try again.");
+        }
     }
-  }
+
 
   function playVideo()
   {

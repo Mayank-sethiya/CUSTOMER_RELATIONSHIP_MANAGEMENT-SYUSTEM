@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Management - TrackForce CRM</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
   <style>
     /* General Styles */
     * {
@@ -24,7 +25,7 @@
     }
 
     body[data-theme="light"] {
-      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      background: linear-gradient(135deg, #386db5 0%, rgb(181, 0, 237) 100%);
       color: #1e293b;
     }
 
@@ -609,8 +610,11 @@
     </form>
   </div>
 </div>
+<script src="../config.js"></script>
 
 <script>
+
+
   document.addEventListener('DOMContentLoaded', function () {
     const adminName = localStorage.getItem('adminName');
     const adminWelcome = document.getElementById('adminWelcome');
@@ -704,7 +708,7 @@
   }
 
   function loadUsers() {
-    fetch('http://localhost:8080/api/users')
+    fetch(`${USER_API}`)
             .then(res => {
               if (!res.ok) {
                 throw new Error('Failed to fetch users');
@@ -755,7 +759,7 @@
     if (keyword === "") {
       loadUsers();
     } else {
-      fetch(`http://localhost:8080/api/users/search?keyword=${encodeURIComponent(keyword)}`)
+      fetch(`${USER_API}/search?keyword=${encodeURIComponent(keyword)}`)
               .then(res => {
                 if (!res.ok) {
                   throw new Error('Search failed');
@@ -771,7 +775,7 @@
   });
 
   function editUser(userId) {
-    fetch(`http://localhost:8080/api/users`)
+    fetch(`${USER_API}`)
             .then(res => res.json())
             .then(users => {
               const user = users.find(u => u.id === userId);
@@ -800,7 +804,7 @@
     if (confirm('Are you sure you want to delete this user?')) {
       console.log("Deleting user with ID:", userId);
 
-      fetch(`http://localhost:8080/api/users/${userId}`, {
+      fetch(`${USER_API}/${userId}`, {
         method: 'DELETE'
       })
               .then(res => {
@@ -835,7 +839,6 @@
       username: document.getElementById('userName').value.trim(),
       email: document.getElementById('userEmail').value.trim(),
       password: document.getElementById('userPassword').value.trim(),
-      status: document.getElementById('userStatus').value,
       phonenumber: document.getElementById('userPhone').value.trim() || "",
       location: document.getElementById('userLocation').value.trim() || ""
     };
@@ -847,8 +850,8 @@
 
     const method = userId ? 'PUT' : 'POST';
     const url = userId
-            ? `http://localhost:8080/api/users/${userId}`
-            : `http://localhost:8080/api/users/register`;
+            ? `${USER_API}/${userId}`
+            : `${USER_API}/register`;
 
     fetch(url, {
       method: method,

@@ -6,6 +6,7 @@
     <title>Notifications - TrackForce CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -15,7 +16,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #b107fa 0%, #5f0eb1 100%);
             color: #f1f5f9;
             transition: all 0.3s ease;
             min-height: 100vh;
@@ -23,7 +24,7 @@
         }
 
         body[data-theme="light"] {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #4ba2ff 0%, #053c78 100%);
             color: #1e293b;
         }
 
@@ -724,14 +725,18 @@
             <button class="modal-btn modal-btn-secondary" onclick="closeViewModal()">
                 <i class="fas fa-times"></i> Close
             </button>
-            <button class="modal-btn modal-btn-primary" onclick="handleModalAction()">
+            <button class="modal-btn modal-btn-primary" onclick="handleModalAction()" id="modalReadButton">
                 <i class="fas fa-check"></i> Mark as Read
             </button>
+
         </div>
     </div>
 </div>
+<script src="../config.js"></script>
 
 <script>
+
+
     // Set theme based on localStorage
     const theme = localStorage.getItem('theme') || 'dark';
     document.body.setAttribute('data-theme', theme);
@@ -1026,22 +1031,29 @@
         const modal = document.getElementById('viewModal');
         const notificationId = modal.dataset.currentNotificationId;
 
-        if (notificationId) {
-            const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
-            if (notificationElement && notificationElement.classList.contains('unread')) {
-                markAsRead(notificationElement, notificationId);
-            }
-        }
+        if (!notificationId) return;
 
+        const notificationElement = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+
+        if (!notificationElement) return;
+
+        // ✅ Always update even if user already clicked the 'view' icon
+        markAsRead(notificationElement, notificationId);
+
+        // ✅ Optional: feedback to user (add "marked" class, remove badge, etc.)
+
+        // ✅ Close the modal
         closeViewModal();
     }
+
 
     function loadNotifications() {
         // Get current user email from localStorage
         const currentUserEmail = localStorage.getItem('userEmail');
 
-        fetch("http://localhost:8080/api/broadcast/all")
-            .then(res => res.json())
+        fetch(`${BROADCAST_API}/all`)
+
+                .then(res => res.json())
             .then(messages => {
                 const list = document.getElementById("notificationList");
                 list.innerHTML = ""; // Clear existing

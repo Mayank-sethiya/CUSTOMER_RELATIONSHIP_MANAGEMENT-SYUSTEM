@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")
+@CrossOrigin(origins = "*")
 public class TaskReportController {
 
     @Autowired
@@ -21,6 +22,7 @@ public class TaskReportController {
     @Autowired
     private TaskReportRepository taskReportRepository;
 
+    // 🌟 Submit a report with optional file uploading to S3
     @PostMapping
     public ResponseEntity<String> submitReport(
             @RequestParam("taskId") Long taskId,
@@ -32,10 +34,13 @@ public class TaskReportController {
     ) throws IOException {
 
         String fileUrl = null;
+
+        // ✔️ Upload file to AWS S3 if provided
         if (file != null && !file.isEmpty()) {
-            fileUrl = fileStorageService.saveFiles(new MultipartFile[]{file}).get(0);
+            fileUrl = fileStorageService.saveFiles(new MultipartFile[]{file}).get(0); // Returns the first file's S3 URL
         }
 
+        // Create report object and save
         TaskReportEntity report = new TaskReportEntity();
         report.setTaskId(taskId);
         report.setTitle(title);
@@ -47,22 +52,19 @@ public class TaskReportController {
         taskReportRepository.save(report);
         return ResponseEntity.ok("Report submitted successfully!");
     }
+
+    // 🌟 Get reports (with optional filters)
     @GetMapping
     public ResponseEntity<List<TaskReportEntity>> getReports(
             @RequestParam(required = false) String userEmail,
             @RequestParam(required = false) String userId) {
 
-        // If no filters specified, return all reports
         if ((userEmail == null || userEmail.isBlank()) &&
                 (userId == null || userId.isBlank())) {
             return ResponseEntity.ok(taskReportRepository.findAll());
         }
 
-        // Otherwise, use filter method
         List<TaskReportEntity> reports = taskReportRepository.searchReports(userEmail, userId);
         return ResponseEntity.ok(reports);
     }
-
-
-
 }

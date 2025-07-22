@@ -5,6 +5,7 @@
     <title>Admin - Lead Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -521,8 +522,11 @@
 <button class="back-btn" onclick="goBack()">
     <i class="fas fa-arrow-left"></i> Back to Dashboard
 </button>
+<script src="../config.js"></script>
 
 <script>
+
+
     let allLeads = [];
     let filteredLeads = [];
     let currentPage = 1;
@@ -544,7 +548,7 @@
             showLoading();
 
             // Fetch from your actual API endpoint
-            const response = await fetch("http://localhost:8080/api/support");
+            const response = await fetch(`${CONTACT_API}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -773,7 +777,8 @@
         if (leadIndex === -1) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/support/${leadId}?status=contacted`, {
+            const response = await fetch(`${CONTACT_API}/${leadId}?status=contacted`, {
+
                 method: 'PUT'
             });
 
