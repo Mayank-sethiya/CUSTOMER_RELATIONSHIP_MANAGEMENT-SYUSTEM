@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TrackForce CRM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #764ba2 0%, #764ba2 100%);
+            color: #f1f5f9;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Light Theme Variables */
+        body[data-theme="light"] {
+            background: linear-gradient(135deg, #764ba2 0%, #764ba2 100%);
+            color: #1e293b;
+        }
+
+        :root {
+            --primary: #5454ff;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(71, 85, 105, 0.5);
+            --shadow: rgba(0, 0, 0, 0.3);
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --sidebar-text: #f1f5f9;
+            --sidebar-text-secondary: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(226, 232, 240, 0.5);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --sidebar-bg: rgba(254, 254, 255, 0.74);
+            --card-bg: rgba(254, 254, 255, 0.74);
+            --sidebar-text: #1e293b;
+            --sidebar-text-secondary: #64748b;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: 0 2px 20px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .back-button {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .back-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .admin-welcome {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--sidebar-text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 80px;
+            box-shadow: 2px 0 20px var(--shadow);
+            z-index: 900;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--sidebar-text);
+            margin-bottom: 5px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 14px;
+            color: var(--sidebar-text-secondary);
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 20px;
+        }
+
+        .nav-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--sidebar-text-secondary);
+            padding: 0 30px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 30px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 24px;
+        }
+
+        /* Main Container Styles */
+        .main-container {
+            margin-left: 280px;
+            padding: 80px 40px 40px;
+            transition: margin-left 0.3s ease;
+            overflow-y: auto;
+            max-height: calc(100vh - 0px);
+        }
+
+        /* Welcome Section Styles */
+        .welcome-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 30px var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        /* Colorful Stat Cards with Side Colors */
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:nth-child(1)::before {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card:nth-child(2)::before {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stat-card:nth-child(3)::before {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .stat-card:nth-child(4)::before {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .stat-card:hover::before {
+            width: 6px;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-card:nth-child(1) .stat-number {
+            color: #e74c3c;
+        }
+
+        .stat-card:nth-child(2) .stat-number {
+            color: #3498db;
+        }
+
+        .stat-card:nth-child(3) .stat-number {
+            color: #2ecc71;
+        }
+
+        .stat-card:nth-child(4) .stat-number {
+            color: #9b59b6;
+        }
+
+        .stat-label {
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Dashboard-specific styles that inherit from control panel */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin-bottom: 15px;
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+        }
+
+        .activity-icon.user { background: #3498db; }
+        .activity-icon.contact { background: #2ecc71; }
+        .activity-icon.message { background: #9b59b6; }
+        .activity-icon.broadcast { background: #f39c12; }
+        .activity-icon.alert { background: #e74c3c; }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .activity-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .status-sent { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .metric-change {
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .metric-change.positive { color: #2ecc71; }
+        .metric-change.negative { color: #e74c3c; }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-primary);
+            background: var(--border);
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+
+        .toast.success { background: var(--primary); }
+        .toast.warning { background: #f59e0b; }
+        .toast.error { background: #ef4444; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                padding: 20px;
+                box-shadow: none;
+                transform: translateX(-100%);
+                transition: transform 0.5s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-container {
+                margin-left: 0;
+                padding: 20px;
+                max-height: none;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+<div class="header">
+    <div class="header-left">
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="admin-welcome" id="adminWelcome">Welcome, Admin!</span>
+    </div>
+    <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-adjust"></i>
+        </button>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2 class="sidebar-title">TrackForce CRM</h2>
+        <span class="sidebar-subtitle">Admin Panel</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <button class="nav-item active" onclick="showDashboard()">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </button>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Management</div>
+            <button class="nav-item" onclick="navigateToPage('user-management.html')">
+                <i class="fas fa-users"></i>
+                <span>User Management</span>
+            </button>
+
+            <button class="nav-item" onclick="navigateToPage('contact-management.html')">
+                <i class="fas fa-address-book"></i>
+                <span>Contact Management</span>
+            </button>
+
+            <button class="nav-item" onclick="navigateToPage('broadcast-messaging.html')">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Broadcast Messaging</span>
+            </button>
+            <button class="nav-item" onclick="navigateToPage('Task-Assign.html')">
+                <i class="fas fa-tasks"></i>
+                <span>Task Assignment</span>
+            </button>
+            <button class="nav-item" onclick="navigateToPage('View-Reports.html')">
+                <i class="fas fa-file-alt"></i>
+                <span>View Reports</span>
+            </button>
+
+
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Support</div>
+            <button class="nav-item" onclick="navigateToPage('Leads.html')">
+                <i class="fas fa-envelope"></i>
+                <span>Leads</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<div class="main-container">
+    <!-- Dashboard Overview Cards -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Admin Control Panel</h1>
+        <p class="welcome-subtitle">Welcome to the TrackForce CRM Admin Panel. From here you can manage users, monitor analytics, and configure system settings. Use the navigation menu to access different sections of the admin interface.</p>
+
+        <div class="welcome-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="userCount">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="activeUsersCount">0</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="signupCount">0</div>
+                <div class="stat-label">New Sign-ups<br>(Last 24h)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number" id="leadCount">0</div>
+                <div class="stat-label">Leads</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="dashboard-grid">
+        <!-- Revenue Chart -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-plus"></i>
+                    Signup Status
+                </h3>
+
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="metric-value" id="signupThisMonth">0</div>
+            <div class="metric-label">New Signups This Month</div>
+            <div class="metric-change positive" id="signupChange">↑ 0% from last month</div>
+        </div>
+
+        <!-- User Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users"></i>
+                    User Activity
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="userChart"></canvas>
+            </div>
+            <div class="metric-value" id="activeUsersToday">0</div>
+            <div class="metric-label">Active Users Today</div>
+            <div class="metric-change positive" id="activeUserChange">↑ 0% from yesterday</div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activities
+                </h3>
+            </div>
+            <ul class="activity-list" id="activityList">
+                <!-- Dynamic activities will be injected here -->
+            </ul>
+        </div>
+
+        <!-- System Performance -->
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-bolt"></i>
+                Quick Actions
+            </h3>
+        </div>
+        <div class="quick-actions">
+            <button class="action-btn" onclick="createUser()">
+                <i class="fas fa-user-plus"></i>
+                Add User
+            </button>
+            <button class="action-btn" onclick="sendBroadcast()">
+                <i class="fas fa-broadcast-tower"></i>
+                Send Broadcast
+            </button>
+            <button class="action-btn" onclick="exportData()">
+                <i class="fas fa-download"></i>
+                Export Data
+            </button>
+            <button class="action-btn" onclick="generateReport()">
+                <i class="fas fa-file-pdf"></i>
+                Generate Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Recent Users Table -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-table"></i>
+                Recent Users
+            </h3>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                </tr>
+                </thead>
+                <tbody id="recentUsersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="toast success">Success message here</div>
+<div class="toast warning">Warning message here</div>
+<div class="toast error">Error message here</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get admin name from localStorage and update welcome message
+        const adminName = localStorage.getItem('adminName');
+        const adminWelcome = document.getElementById('adminWelcome');
+        if (adminName) {
+            adminWelcome.textContent = `Hi ${adminName}!`;
+        }
+
+        // Initialize charts when dashboard loads
+        initializeCharts();
+        loadRecentUsers();
+        loadRecentActivities();
+    });
+
+    // Theme toggle function
+    function toggleTheme() {
+        const body = document.body;
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.setAttribute('data-theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+        }
+    }
+
+    // Navigation functions
+    function goBack() {
+        window.location.href = '../index.html';
+    }
+
+    function logout() {
+        // Clear localStorage
+        localStorage.removeItem('adminName');
+        // Redirect to home page
+        window.location.href = '../index.html';
+    }
+
+    function navigateToPage(pageName) {
+        window.location.href = pageName;
+    }
+
+    function showDashboard() {
+        // Highlight the active state
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+        event.target.closest('.nav-item').classList.add('active');
+
+        // Show toast notification
+        showToast('Dashboard loaded successfully!');
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.querySelector(`.toast.${type}`);
+        toast.textContent = message;
+        toast.style.display = 'block';
+
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    // Recent Activities Integration
+    function loadRecentActivities() {
+        console.log('Loading recent activities...');
+        const activityList = document.getElementById('activityList');
+        activityList.innerHTML = '<li style="text-align: center; padding: 20px; color: var(--text-secondary);">Loading activities...</li>';
+
+        Promise.all([
+            fetch("http://localhost:8080/api/broadcast/all").then(res => {
+                console.log('Broadcast API response status:', res.status);
+                return res.ok ? res.json() : [];
+            }).catch(err => {
+                console.error('Error fetching broadcasts:', err);
+                return [];
+            }),
+            fetch('http://localhost:8080/api/users').then(res => {
+                console.log('Users API response status:', res.status);
+                return res.ok ? res.json() : [];
+            }).catch(err => {
+                console.error('Error fetching users:', err);
+                return [];
+            })
+        ])
+            .then(([broadcasts, users]) => {
+                const activities = [];
+
+                // Add broadcast activities
+                broadcasts.forEach(msg => {
+                    activities.push({
+                        type: 'broadcast',
+                        title: `Broadcast: ${msg.subject}`,
+                        subtitle: `Sent to ${msg.totalRecipients} recipients`,
+                        time: msg.createdAt,
+                        status: msg.status,
+                        id: msg.id
+                    });
+                });
+
+                // Add recent user registrations (last 7 days)
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+
+                users.filter(user => new Date(user.createdAt) > weekAgo)
+                    .forEach(user => {
+                        activities.push({
+                            type: 'user',
+                            title: `New user registered: ${user.username}`,
+                            subtitle: user.email,
+                            time: user.createdAt,
+                            status: user.status
+                        });
+                    });
+
+                // Sort by time (most recent first)
+                activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+                // Display only the 10 most recent activities
+                const recentActivities = activities.slice(0, 10);
+
+                if (recentActivities.length === 0) {
+                    activityList.innerHTML = '<li style="text-align: center; padding: 20px; color: var(--text-secondary);">No recent activities</li>';
+                    return;
+                }
+
+                activityList.innerHTML = '';
+                recentActivities.forEach(activity => {
+                    const item = document.createElement('li');
+                    item.className = 'activity-item';
+
+                    const iconClass = activity.type === 'broadcast' ? 'broadcast' : 'user';
+                    const iconName = activity.type === 'broadcast' ? 'fa-broadcast-tower' : 'fa-user-plus';
+
+                    let statusBadge = '';
+                    if (activity.status && activity.type === 'broadcast') {
+                        const statusClass = activity.status === "Sent" ? "status-sent"
+                            : activity.status === "Pending" ? "status-pending"
+                                : "status-failed";
+                        statusBadge = `<span class="activity-status ${statusClass}">${activity.status}</span>`;
+                    }
+
+                    let deleteButton = '';
+                    if (activity.type === 'broadcast' && activity.id) {
+                        deleteButton = `<i class="fas fa-trash" style="margin-left:10px; cursor:pointer; color: #e74c3c;" onclick="deleteMessage(${activity.id})"></i>`;
+                    }
+
+                    item.innerHTML = `
+                    <div class="activity-icon ${iconClass}">
+                        <i class="fas ${iconName}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time">${activity.subtitle} • ${formatTimeAgo(activity.time)}</div>
+                    </div>
+                    ${statusBadge}
+                    ${deleteButton}
+                `;
+
+                    activityList.appendChild(item);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading activities:', error);
+                activityList.innerHTML = '<li style="text-align: center; padding: 20px; color: var(--text-secondary);">Error loading activities</li>';
+            });
+    }
+
+    // Delete message function for broadcasts
+    function deleteMessage(id) {
+        if (confirm('Are you sure you want to delete this broadcast message?')) {
+            fetch(`http://localhost:8080/api/broadcast/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showToast('Broadcast message deleted successfully!');
+                        loadRecentActivities(); // Reload activities
+                    } else {
+                        showToast('Failed to delete message', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting message:', error);
+                    showToast('Error deleting message', 'error');
+                });
+        }
+    }
+
+    function initializeCharts() {
+        // Line Chart for Monthly Signups
+        fetch("http://localhost:8080/api/users/signups/monthly")
+            .then(res => res.json())
+            .then(signupData => {
+                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: signupData.months, // e.g., ['Jan', 'Feb', ...]
+                        datasets: [{
+                            label: 'Monthly Signups',
+                            data: signupData.counts,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Number of Signups', color: '#94a3b8' },
+                                grid: { color: 'rgba(71, 85, 105, 0.2)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Month', color: '#94a3b8' },
+                                grid: { color: 'rgba(71, 85, 105, 0.2)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+
+                    }
+                });
+
+                // Update signup stat card
+                const current = signupData.counts.at(-1);
+                const previous = signupData.counts.at(-2) || 1;
+                const change = (((current - previous) / previous) * 100).toFixed(1);
+
+                document.getElementById("signupThisMonth").textContent = current;
+                const changeElem = document.getElementById("signupChange");
+                changeElem.textContent = `${change >= 0 ? '↑' : '↓'} ${Math.abs(change)}% from last month`;
+                changeElem.className = `metric-change ${change >= 0 ? 'positive' : 'negative'}`;
+            });
+
+        // Doughnut Chart for Users
+        fetch("http://localhost:8080/api/users")
+            .then(res => res.json())
+            .then(users => {
+                const active = users.filter(u => u.status === 'active').length;
+                const inactive = users.filter(u => u.status === 'inactive').length;
+                const total = users.length;
+
+                fetch("http://localhost:8080/api/support/count")
+                    .then(res => res.json())
+                    .then(leads => {
+                        const userCtx = document.getElementById('userChart').getContext('2d');
+                        new Chart(userCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['Active', 'Leads', 'Inactive'],
+                                datasets: [{
+                                    data: [active, leads, inactive],
+                                    backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            color: '#94a3b8',
+                                            usePointStyle: true,
+                                            padding: 15
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        // Update user stat cards
+                        document.getElementById("activeUsersToday").textContent = active;
+                        document.getElementById("totalUserCount").textContent = total;
+
+                        const yesterdayActive = active - Math.floor(active * 0.083);
+                        const changePercent = (((active - yesterdayActive) / yesterdayActive) * 100).toFixed(1);
+                        const changeElement = document.getElementById("activeUserChange");
+                        changeElement.textContent = `${changePercent >= 0 ? '↑' : '↓'} ${Math.abs(changePercent)}% from yesterday`;
+                        changeElement.className = `metric-change ${changePercent >= 0 ? 'positive' : 'negative'}`;
+                    });
+            });
+    }
+
+    // Quick action functions
+    function createUser() {
+        window.location.href = 'user-management.html';
+    }
+
+    function sendBroadcast() {
+        window.location.href = 'broadcast-messaging.html';
+    }
+
+    function exportData() {
+        showToast('Preparing data export...', 'warning');
+
+        Promise.all([
+            fetch('http://localhost:8080/api/users').then(res => res.json()).catch(() => []),
+            fetch("http://localhost:8080/api/broadcast/all").then(res => res.json()).catch(() => []),
+            fetch("http://localhost:8080/api/support/count").then(res => res.json()).catch(() => 0)
+        ])
+            .then(([users, broadcasts, leadCount]) => {
+                // Create CSV content
+                let csvContent = "data:text/csv;charset=utf-8,";
+
+                // Users CSV
+                csvContent += "=== USERS DATA ===\n";
+                csvContent += "Username,Email,Phone,Location,Status,Created At,Last Login\n";
+                users.forEach(user => {
+                    csvContent += `"${user.username}","${user.email}","${user.phonenumber || 'N/A'}","${user.location || 'N/A'}","${user.status}","${new Date(user.createdAt).toLocaleDateString()}","${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}"\n`;
+                });
+
+                csvContent += "\n=== BROADCASTS DATA ===\n";
+                csvContent += "Subject,Recipients,Total Recipients,Status,Created At\n";
+                broadcasts.forEach(broadcast => {
+                    csvContent += `"${broadcast.subject}","${broadcast.recipients}","${broadcast.totalRecipients}","${broadcast.status}","${new Date(broadcast.createdAt).toLocaleDateString()}"\n`;
+                });
+
+                csvContent += `\n=== SUMMARY ===\n`;
+                csvContent += `Total Users,${users.length}\n`;
+                csvContent += `Active Users,${users.filter(u => u.status === 'active').length}\n`;
+                csvContent += `Total Broadcasts,${broadcasts.length}\n`;
+                csvContent += `Total Leads,${leadCount}\n`;
+                csvContent += `Export Date,${new Date().toLocaleString()}\n`;
+
+                // Download file
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `dashboard_data_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast('Data exported successfully!');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                showToast('Failed to export data', 'error');
+            });
+    }
+
+    function generateReport() {
+        showToast('Generating dashboard report...', 'warning');
+
+        Promise.all([
+            fetch('http://localhost:8080/api/users').then(res => res.json()).catch(() => []),
+            fetch("http://localhost:8080/api/broadcast/all").then(res => res.json()).catch(() => []),
+            fetch("http://localhost:8080/api/support/count").then(res => res.json()).catch(() => 0)
+        ])
+            .then(([users, broadcasts, leadCount]) => {
+                const activeUsers = users.filter(u => u.status === 'active').length;
+                const recentUsers = users.filter(u => {
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return new Date(u.createdAt) > weekAgo;
+                }).length;
+
+                const sentBroadcasts = broadcasts.filter(b => b.status === 'Sent').length;
+                const pendingBroadcasts = broadcasts.filter(b => b.status === 'Pending').length;
+
+                // Create HTML report
+                const reportHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrackForce CRM Dashboard Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+        .header { text-align: center; border-bottom: 3px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 30px 0; }
+        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #6366f1; }
+        .stat-number { font-size: 32px; font-weight: bold; color: #6366f1; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .section { margin: 30px 0; }
+        .section h2 { color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #6366f1; color: white; }
+        .footer { margin-top: 50px; text-align: center; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TrackForce CRM Dashboard Report</h1>
+        <p>Generated on ${new Date().toLocaleString()}</p>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">${users.length}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">${activeUsers}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">${leadCount}</div>
+            <div class="stat-label">Total Leads</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">${broadcasts.length}</div>
+            <div class="stat-label">Total Broadcasts</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>User Analytics</h2>
+        <p><strong>New Users (Last 7 Days):</strong> ${recentUsers}</p>
+        <p><strong>User Growth Rate:</strong> ${((recentUsers / users.length) * 100).toFixed(1)}%</p>
+        <p><strong>Active User Percentage:</strong> ${((activeUsers / users.length) * 100).toFixed(1)}%</p>
+    </div>
+
+    <div class="section">
+        <h2>Broadcast Performance</h2>
+        <p><strong>Successful Broadcasts:</strong> ${sentBroadcasts}</p>
+        <p><strong>Pending Broadcasts:</strong> ${pendingBroadcasts}</p>
+        <p><strong>Success Rate:</strong> ${broadcasts.length > 0 ? ((sentBroadcasts / broadcasts.length) * 100).toFixed(1) : 0}%</p>
+    </div>
+
+    <div class="section">
+        <h2>Recent Users</h2>
+        <table>
+            <thead>
+                <tr><th>Username</th><th>Email</th><th>Status</th><th>Created Date</th></tr>
+            </thead>
+            <tbody>
+                ${users.slice(0, 10).map(user => `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.status}</td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Recent Broadcasts</h2>
+        <table>
+            <thead>
+                <tr><th>Subject</th><th>Recipients</th><th>Status</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                ${broadcasts.slice(0, 10).map(broadcast => `
+                    <tr>
+                        <td>${broadcast.subject}</td>
+                        <td>${broadcast.totalRecipients}</td>
+                        <td>${broadcast.status}</td>
+                        <td>${new Date(broadcast.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>TrackForce CRM Admin Dashboard Report</p>
+        <p>This report contains confidential information</p>
+    </div>
+</body>
+</html>`;
+
+                // Download HTML report
+                const blob = new Blob([reportHTML], { type: 'text/html' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `dashboard_report_${new Date().toISOString().split('T')[0]}.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                showToast('Report generated successfully!');
+            })
+            .catch(error => {
+                console.error('Report generation error:', error);
+                showToast('Failed to generate report', 'error');
+            });
+    }
+
+    function editUser(username) {
+        showToast(`Edit User: ${username} - This would open the user editing interface`, 'warning');
+    }
+
+    // Auto-refresh dashboard data every 30 seconds
+    setInterval(function() {
+        updateDashboardData();
+        loadRecentActivities();
+    }, 30000);
+
+    function loadRecentUsers() {
+        fetch('http://localhost:8080/api/users')
+            .then(res => res.json())
+            .then(users => {
+                users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const recent = users.slice(0, 5);
+
+                const tbody = document.getElementById('recentUsersTableBody');
+                tbody.innerHTML = '';
+
+                recent.forEach(user => {
+                    const statusClass = user.status === 'active' ? 'status-active'
+                        : user.status === 'inactive' ? 'status-inactive'
+                            : 'status-pending';
+
+                    const row = `
+                      <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td><span class="status-badge ${statusClass}">${user.status}</span></td>
+                        <td>${formatTimeAgo(user.lastLogin || user.createdAt)}</td>
+                      </tr>
+                    `;
+
+                    tbody.innerHTML += row;
+                });
+            });
+    }
+
+    function formatTimeAgo(date) {
+        const diff = Date.now() - new Date(date).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 60) return `${mins} mins ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs} hours ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days} days ago`;
+    }
+
+    function updateDashboardData() {
+        fetch("http://localhost:8080/api/users")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("userCount").textContent = data.length;
+
+                const activeUsers = data.filter(user => user.status === 'active');
+                document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = activeUsers.length;
+
+                fetch("http://localhost:8080/api/users/count/recent")
+                    .then(res => res.json())
+                    .then(recentCount => {
+                        document.getElementById("signupCount").textContent = recentCount;
+                    });
+            })
+            .catch(error => console.error("Error fetching users:", error));
+
+        // ✅ Fetch and update lead count
+        fetch("http://localhost:8080/api/support/count")
+            .then(res => res.json())
+            .then(count => {
+                document.getElementById("leadCount").textContent = count;
+            })
+            .catch(err => console.error("Error fetching lead count:", err));
+
+
+    }
+
+    // Initial load
+    updateDashboardData();
+    loadSystemPerformance();
+
+    // Auto-refresh every 30 sec
+    setInterval(() => {
+        updateDashboardData();
+        loadSystemPerformance();
+    }, 30000);
+</script>
+</body>
+</html>
